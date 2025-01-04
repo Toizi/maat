@@ -9,6 +9,7 @@ This project requires a few dependencies:
   * Can be disabled with CMake option `-Dmaat_USE_Z3=OFF` during configuration
 * [LIEF](https://github.com/lief-project/LIEF) - for automatic binary loading
   * Can be disabled with CMake option `-Dmaat_USE_LIEF=OFF` during configuration
+  * Requires [`tl-expected`](https://github.com/TartanLlama/expected) if enabled
 * [sleigh](https://github.com/lifting-bits/sleigh) - for Ghidra sleigh pcode handling
   * Vendored version can be built with CMake option `-Dmaat_USE_EXTERNAL_SLEIGH=OFF` during configuration after you pull the submodule (`git submodule update --init --recursive`)
 * Python3 development headers and library - for Python bindings

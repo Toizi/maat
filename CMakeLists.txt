@@ -115,9 +115,16 @@ if(maat_USE_EXTERNAL_SLEIGH)
   find_package(sleigh REQUIRED)
 else()
   set(sleigh_ENABLE_TESTS OFF CACHE BOOL "")
+  set(sleigh_BUILD_SUPPORT ON CACHE BOOL "" FORCE)
+  set(sleigh_BUILD_TOOLS ON CACHE BOOL "" FORCE)
+  set(sleigh_BUILD_SLEIGHSPECS ON CACHE BOOL "" FORCE)
   add_subdirectory(src/third-party/sleigh/sleigh-cmake sleigh EXCLUDE_FROM_ALL)
 endif()
 
+# need to set PIC when linking a static sleigh lib against the shared maat lib
+if(NOT BUILD_SHARED_LIBS)
+  set_property(TARGET sleigh_sla PROPERTY POSITION_INDEPENDENT_CODE ON)
+endif()
 target_link_libraries(
   maat_maat
   PUBLIC GMP::GMP
@@ -131,7 +138,8 @@ if(maat_USE_Z3)
 endif()
 
 if(maat_USE_LIEF)
-  find_package(LIEF 0.12 REQUIRED)
+  find_package(LIEF 0.16 REQUIRED)
+  find_package(tl-expected REQUIRED)
   target_link_libraries(maat_maat PUBLIC LIEF::LIEF)
   target_compile_definitions(maat_maat PUBLIC MAAT_LIEF_BACKEND=1 MAAT_HAS_LOADER_BACKEND=1)
 endif()
@@ -156,14 +164,14 @@ add_custom_command(
 # Allow user to override sleigh compiler to support cross-compilation. Default
 # location is the one imported when we found the sleigh package
 if(CMAKE_CROSSCOMPILING)
-  find_program(maat_SLEIGH_COMPILER "sleigh_opt"
+  find_program(maat_SLEIGH_COMPILER "sleigh"
     DOC "Sleigh compiler executable"
   )
   if(NOT maat_SLEIGH_COMPILER)
     message(FATAL_ERROR "Maat needs a sleigh compiler. Specify path manually by setting 'maat_SLEIGH_COMPILER'")
   endif()
 else()
-  set(maat_SLEIGH_COMPILER "$<TARGET_FILE:sleigh::sleigh_opt>" CACHE PATH "Sleigh compiler executable")
+  set(maat_SLEIGH_COMPILER "$<TARGET_FILE:sleigh::sleigh>" CACHE PATH "Sleigh compiler executable")
 endif()
 
 macro(maat_sleigh_compile ARCH_DIR ARCH)

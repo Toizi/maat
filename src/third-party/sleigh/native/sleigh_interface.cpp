@@ -1,12 +1,13 @@
 #include "maat/sleigh_interface.hpp"
 
+#include <sstream>
 #include <stdio.h>
 #include <assert.h>
 #include <stdbool.h>
 
-#include <sleigh/loadimage.hh>
-#include <sleigh/sleigh.hh>
-#include <sleigh/types.h>
+#include <ghidra/loadimage.hh>
+#include <ghidra/sleigh.hh>
+#include <ghidra/types.h>
 
 #include "maat/ir.hpp"
 #include "maat/exception.hpp"
@@ -26,10 +27,10 @@
 namespace maat
 {
 
-class SimpleLoadImage : public LoadImage
+class SimpleLoadImage : public ghidra::LoadImage
 {
-    uintb                m_baseaddr;
-    int4                 m_length;
+    ghidra::uintb        m_baseaddr;
+    ghidra::uint4        m_length;
     const unsigned char *m_data;
 
 public:
@@ -41,17 +42,17 @@ public:
         m_length = 0;
     }
 
-    void setData(uintb ad, const unsigned char *ptr,int4 sz)
+    void setData(ghidra::uintb ad, const unsigned char *ptr, ghidra::uint4 sz)
     {
         m_baseaddr = ad;
         m_data = ptr;
         m_length = sz;
     }
 
-    void loadFill(uint1 *ptr, int4 size, const Address &addr)
+    void loadFill(ghidra::uint1 *ptr, ghidra::int4 size, const ghidra::Address &addr)
     {
-        uintb start = addr.getOffset();
-        uintb max = m_baseaddr + m_length - 1;
+        ghidra::uintb start = addr.getOffset();
+        ghidra::uintb max = m_baseaddr + m_length - 1;
 
         //
         // When decoding an instruction, SLEIGH will attempt to pull in several
@@ -65,97 +66,97 @@ public:
             throw std::out_of_range("Attempting to lift outside buffer range");
         }
 
-        for(int4 i = 0; i < size; i++) {
-            uintb curoff = start + i;
+        for(ghidra::uint4 i = 0; i < size; i++) {
+            ghidra::uintb curoff = start + i;
             if ((curoff < m_baseaddr) || (curoff>max)) {
                 ptr[i] = 0;
                 continue;
             }
-            uintb diff = curoff - m_baseaddr;
-            ptr[i] = m_data[(int4)diff];
+            ghidra::uintb diff = curoff - m_baseaddr;
+            ptr[i] = m_data[(ghidra::uint4)diff];
         }
     }
 
-    virtual string getArchType(void) const { return "myload"; }
+    virtual ghidra::string getArchType(void) const { return "myload"; }
     virtual void adjustVma(long adjust) { }
 };
 
-std::string opcode_to_str(OpCode op);
-maat::ir::Op translate_pcode_op(OpCode op)
+std::string opcode_to_str(ghidra::OpCode op);
+maat::ir::Op translate_pcode_op(ghidra::OpCode op)
 {
     switch (op)
     {
-        case OpCode::CPUI_COPY: return maat::ir::Op::COPY;
-        case OpCode::CPUI_LOAD: return maat::ir::Op::LOAD;
-        case OpCode::CPUI_STORE: return maat::ir::Op::STORE;
-        case OpCode::CPUI_BRANCH: return maat::ir::Op::BRANCH;            
-        case OpCode::CPUI_CBRANCH: return maat::ir::Op::CBRANCH;           
-        case OpCode::CPUI_BRANCHIND: return maat::ir::Op::BRANCHIND;
-        case OpCode::CPUI_CALL: return maat::ir::Op::CALL;         
-        case OpCode::CPUI_CALLIND: return maat::ir::Op::CALLIND;           
-        case OpCode::CPUI_CALLOTHER: return maat::ir::Op::CALLOTHER;         
-        case OpCode::CPUI_RETURN: return maat::ir::Op::RETURN;            
-        case OpCode::CPUI_INT_EQUAL: return maat::ir::Op::INT_EQUAL;        
-        case OpCode::CPUI_INT_NOTEQUAL: return maat::ir::Op::INT_NOTEQUAL;     
-        case OpCode::CPUI_INT_SLESS: return maat::ir::Op::INT_SLESS;        
-        case OpCode::CPUI_INT_SLESSEQUAL: return maat::ir::Op::INT_SLESSEQUAL;   
-        case OpCode::CPUI_INT_LESS: return maat::ir::Op::INT_LESS;         
-        case OpCode::CPUI_INT_LESSEQUAL: return maat::ir::Op::INT_LESSEQUAL;     
-        case OpCode::CPUI_INT_ZEXT: return maat::ir::Op::INT_ZEXT;         
-        case OpCode::CPUI_INT_SEXT: return maat::ir::Op::INT_SEXT;         
-        case OpCode::CPUI_INT_ADD: return maat::ir::Op::INT_ADD;           
-        case OpCode::CPUI_INT_SUB: return maat::ir::Op::INT_SUB;           
-        case OpCode::CPUI_INT_CARRY: return maat::ir::Op::INT_CARRY;        
-        case OpCode::CPUI_INT_SCARRY: return maat::ir::Op::INT_SCARRY;        
-        case OpCode::CPUI_INT_SBORROW: return maat::ir::Op::INT_SBORROW;       
-        case OpCode::CPUI_INT_2COMP: return maat::ir::Op::INT_2COMP;         
-        case OpCode::CPUI_INT_NEGATE: return maat::ir::Op::INT_NEGATE;        
-        case OpCode::CPUI_INT_XOR: return maat::ir::Op::INT_XOR;           
-        case OpCode::CPUI_INT_AND: return maat::ir::Op::INT_AND;           
-        case OpCode::CPUI_INT_OR: return maat::ir::Op::INT_OR;           
-        case OpCode::CPUI_INT_LEFT: return maat::ir::Op::INT_LEFT;          
-        case OpCode::CPUI_INT_RIGHT: return maat::ir::Op::INT_RIGHT;        
-        case OpCode::CPUI_INT_SRIGHT: return maat::ir::Op::INT_SRIGHT;       
-        case OpCode::CPUI_INT_MULT: return maat::ir::Op::INT_MULT;         
-        case OpCode::CPUI_INT_DIV: return maat::ir::Op::INT_DIV;          
-        case OpCode::CPUI_INT_SDIV: return maat::ir::Op::INT_SDIV;         
-        case OpCode::CPUI_INT_REM: return maat::ir::Op::INT_REM;          
-        case OpCode::CPUI_INT_SREM: return maat::ir::Op::INT_SREM;         
-        case OpCode::CPUI_BOOL_NEGATE: return maat::ir::Op::BOOL_NEGATE;     
-        case OpCode::CPUI_BOOL_XOR: return maat::ir::Op::BOOL_XOR;         
-        case OpCode::CPUI_BOOL_AND: return maat::ir::Op::BOOL_AND;         
-        case OpCode::CPUI_BOOL_OR: return maat::ir::Op::BOOL_OR;          
-        case OpCode::CPUI_FLOAT_EQUAL: return maat::ir::Op::FLOAT_EQUAL;      
-        case OpCode::CPUI_FLOAT_NOTEQUAL: return maat::ir::Op::FLOAT_NOTEQUAL;  
-        case OpCode::CPUI_FLOAT_LESS: return maat::ir::Op::FLOAT_LESS;      
-        case OpCode::CPUI_FLOAT_LESSEQUAL: return maat::ir::Op::FLOAT_LESSEQUAL;            
-        case OpCode::CPUI_FLOAT_NAN: return maat::ir::Op::FLOAT_NAN;         
-        case OpCode::CPUI_FLOAT_ADD: return maat::ir::Op::FLOAT_ADD;         
-        case OpCode::CPUI_FLOAT_DIV: return maat::ir::Op::FLOAT_DIV;        
-        case OpCode::CPUI_FLOAT_MULT: return maat::ir::Op::FLOAT_MULT;       
-        case OpCode::CPUI_FLOAT_SUB: return maat::ir::Op::FLOAT_SUB;        
-        case OpCode::CPUI_FLOAT_NEG: return maat::ir::Op::FLOAT_NEG;        
-        case OpCode::CPUI_FLOAT_ABS: return maat::ir::Op::FLOAT_ABS;        
-        case OpCode::CPUI_FLOAT_SQRT: return maat::ir::Op::FLOAT_SQRT;      
-        case OpCode::CPUI_FLOAT_INT2FLOAT: return maat::ir::Op::FLOAT_INT2FLOAT;  
-        case OpCode::CPUI_FLOAT_FLOAT2FLOAT: return maat::ir::Op::FLOAT_FLOAT2FLOAT;
-        case OpCode::CPUI_FLOAT_TRUNC: return maat::ir::Op::FLOAT_TRUNC;     
-        case OpCode::CPUI_FLOAT_CEIL: return maat::ir::Op::FLOAT_CEIL;      
-        case OpCode::CPUI_FLOAT_FLOOR: return maat::ir::Op::FLOAT_FLOOR;      
-        case OpCode::CPUI_FLOAT_ROUND: return maat::ir::Op::FLOAT_ROUND;
-        case OpCode::CPUI_MULTIEQUAL: return maat::ir::Op::MULTIEQUAL;     
-        case OpCode::CPUI_INDIRECT: return maat::ir::Op::INDIRECT;        
-        case OpCode::CPUI_PIECE: return maat::ir::Op::PIECE;           
-        case OpCode::CPUI_SUBPIECE: return maat::ir::Op::SUBPIECE;        
-        case OpCode::CPUI_CAST: return maat::ir::Op::CAST;           
-        case OpCode::CPUI_PTRADD: return maat::ir::Op::PTRADD;           
-        case OpCode::CPUI_PTRSUB: return maat::ir::Op::PTRSUB;         
-        case OpCode::CPUI_SEGMENTOP: return maat::ir::Op::SEGMENTOP;       
-        case OpCode::CPUI_CPOOLREF: return maat::ir::Op::CPOOLREF;         
-        case OpCode::CPUI_NEW: return maat::ir::Op::NEW;              
-        case OpCode::CPUI_INSERT: return maat::ir::Op::INSERT;          
-        case OpCode::CPUI_EXTRACT: return maat::ir::Op::EXTRACT;          
-        case OpCode::CPUI_POPCOUNT: return maat::ir::Op::POPCOUNT;
+        case ghidra::OpCode::CPUI_COPY: return maat::ir::Op::COPY;
+        case ghidra::OpCode::CPUI_LOAD: return maat::ir::Op::LOAD;
+        case ghidra::OpCode::CPUI_STORE: return maat::ir::Op::STORE;
+        case ghidra::OpCode::CPUI_BRANCH: return maat::ir::Op::BRANCH;
+        case ghidra::OpCode::CPUI_CBRANCH: return maat::ir::Op::CBRANCH;
+        case ghidra::OpCode::CPUI_BRANCHIND: return maat::ir::Op::BRANCHIND;
+        case ghidra::OpCode::CPUI_CALL: return maat::ir::Op::CALL;
+        case ghidra::OpCode::CPUI_CALLIND: return maat::ir::Op::CALLIND;
+        case ghidra::OpCode::CPUI_CALLOTHER: return maat::ir::Op::CALLOTHER;
+        case ghidra::OpCode::CPUI_RETURN: return maat::ir::Op::RETURN;
+        case ghidra::OpCode::CPUI_INT_EQUAL: return maat::ir::Op::INT_EQUAL;
+        case ghidra::OpCode::CPUI_INT_NOTEQUAL: return maat::ir::Op::INT_NOTEQUAL;
+        case ghidra::OpCode::CPUI_INT_SLESS: return maat::ir::Op::INT_SLESS;
+        case ghidra::OpCode::CPUI_INT_SLESSEQUAL: return maat::ir::Op::INT_SLESSEQUAL;
+        case ghidra::OpCode::CPUI_INT_LESS: return maat::ir::Op::INT_LESS;
+        case ghidra::OpCode::CPUI_INT_LESSEQUAL: return maat::ir::Op::INT_LESSEQUAL;
+        case ghidra::OpCode::CPUI_INT_ZEXT: return maat::ir::Op::INT_ZEXT;
+        case ghidra::OpCode::CPUI_INT_SEXT: return maat::ir::Op::INT_SEXT;
+        case ghidra::OpCode::CPUI_INT_ADD: return maat::ir::Op::INT_ADD;
+        case ghidra::OpCode::CPUI_INT_SUB: return maat::ir::Op::INT_SUB;
+        case ghidra::OpCode::CPUI_INT_CARRY: return maat::ir::Op::INT_CARRY;
+        case ghidra::OpCode::CPUI_INT_SCARRY: return maat::ir::Op::INT_SCARRY;
+        case ghidra::OpCode::CPUI_INT_SBORROW: return maat::ir::Op::INT_SBORROW;
+        case ghidra::OpCode::CPUI_INT_2COMP: return maat::ir::Op::INT_2COMP;
+        case ghidra::OpCode::CPUI_INT_NEGATE: return maat::ir::Op::INT_NEGATE;
+        case ghidra::OpCode::CPUI_INT_XOR: return maat::ir::Op::INT_XOR;
+        case ghidra::OpCode::CPUI_INT_AND: return maat::ir::Op::INT_AND;
+        case ghidra::OpCode::CPUI_INT_OR: return maat::ir::Op::INT_OR;
+        case ghidra::OpCode::CPUI_INT_LEFT: return maat::ir::Op::INT_LEFT;
+        case ghidra::OpCode::CPUI_INT_RIGHT: return maat::ir::Op::INT_RIGHT;
+        case ghidra::OpCode::CPUI_INT_SRIGHT: return maat::ir::Op::INT_SRIGHT;
+        case ghidra::OpCode::CPUI_INT_MULT: return maat::ir::Op::INT_MULT;
+        case ghidra::OpCode::CPUI_INT_DIV: return maat::ir::Op::INT_DIV;
+        case ghidra::OpCode::CPUI_INT_SDIV: return maat::ir::Op::INT_SDIV;
+        case ghidra::OpCode::CPUI_INT_REM: return maat::ir::Op::INT_REM;
+        case ghidra::OpCode::CPUI_INT_SREM: return maat::ir::Op::INT_SREM;
+        case ghidra::OpCode::CPUI_BOOL_NEGATE: return maat::ir::Op::BOOL_NEGATE;
+        case ghidra::OpCode::CPUI_BOOL_XOR: return maat::ir::Op::BOOL_XOR;
+        case ghidra::OpCode::CPUI_BOOL_AND: return maat::ir::Op::BOOL_AND;
+        case ghidra::OpCode::CPUI_BOOL_OR: return maat::ir::Op::BOOL_OR;
+        case ghidra::OpCode::CPUI_FLOAT_EQUAL: return maat::ir::Op::FLOAT_EQUAL;
+        case ghidra::OpCode::CPUI_FLOAT_NOTEQUAL: return maat::ir::Op::FLOAT_NOTEQUAL;
+        case ghidra::OpCode::CPUI_FLOAT_LESS: return maat::ir::Op::FLOAT_LESS;
+        case ghidra::OpCode::CPUI_FLOAT_LESSEQUAL: return maat::ir::Op::FLOAT_LESSEQUAL;
+        case ghidra::OpCode::CPUI_FLOAT_NAN: return maat::ir::Op::FLOAT_NAN;
+        case ghidra::OpCode::CPUI_FLOAT_ADD: return maat::ir::Op::FLOAT_ADD;
+        case ghidra::OpCode::CPUI_FLOAT_DIV: return maat::ir::Op::FLOAT_DIV;
+        case ghidra::OpCode::CPUI_FLOAT_MULT: return maat::ir::Op::FLOAT_MULT;
+        case ghidra::OpCode::CPUI_FLOAT_SUB: return maat::ir::Op::FLOAT_SUB;
+        case ghidra::OpCode::CPUI_FLOAT_NEG: return maat::ir::Op::FLOAT_NEG;
+        case ghidra::OpCode::CPUI_FLOAT_ABS: return maat::ir::Op::FLOAT_ABS;
+        case ghidra::OpCode::CPUI_FLOAT_SQRT: return maat::ir::Op::FLOAT_SQRT;
+        case ghidra::OpCode::CPUI_FLOAT_INT2FLOAT: return maat::ir::Op::FLOAT_INT2FLOAT;
+        case ghidra::OpCode::CPUI_FLOAT_FLOAT2FLOAT: return maat::ir::Op::FLOAT_FLOAT2FLOAT;
+        case ghidra::OpCode::CPUI_FLOAT_TRUNC: return maat::ir::Op::FLOAT_TRUNC;
+        case ghidra::OpCode::CPUI_FLOAT_CEIL: return maat::ir::Op::FLOAT_CEIL;
+        case ghidra::OpCode::CPUI_FLOAT_FLOOR: return maat::ir::Op::FLOAT_FLOOR;
+        case ghidra::OpCode::CPUI_FLOAT_ROUND: return maat::ir::Op::FLOAT_ROUND;
+        case ghidra::OpCode::CPUI_MULTIEQUAL: return maat::ir::Op::MULTIEQUAL;
+        case ghidra::OpCode::CPUI_INDIRECT: return maat::ir::Op::INDIRECT;
+        case ghidra::OpCode::CPUI_PIECE: return maat::ir::Op::PIECE;
+        case ghidra::OpCode::CPUI_SUBPIECE: return maat::ir::Op::SUBPIECE;
+        case ghidra::OpCode::CPUI_CAST: return maat::ir::Op::CAST;
+        case ghidra::OpCode::CPUI_PTRADD: return maat::ir::Op::PTRADD;
+        case ghidra::OpCode::CPUI_PTRSUB: return maat::ir::Op::PTRSUB;
+        case ghidra::OpCode::CPUI_SEGMENTOP: return maat::ir::Op::SEGMENTOP;
+        case ghidra::OpCode::CPUI_CPOOLREF: return maat::ir::Op::CPOOLREF;
+        case ghidra::OpCode::CPUI_NEW: return maat::ir::Op::NEW;
+        case ghidra::OpCode::CPUI_INSERT: return maat::ir::Op::INSERT;
+        case ghidra::OpCode::CPUI_EXTRACT: return maat::ir::Op::EXTRACT;
+        case ghidra::OpCode::CPUI_POPCOUNT: return maat::ir::Op::POPCOUNT;
         default: throw maat::runtime_exception(maat::Fmt()
                             << "translate_pcode_op(): Got unsupported PCODE operation: "
                             << opcode_to_str(op)
@@ -193,12 +194,12 @@ public:
 };
 
 class TranslationContext;
-maat::ir::Param translate_pcode_param(TranslationContext* ctx, VarnodeData* v);
+maat::ir::Param translate_pcode_param(TranslationContext* ctx, ghidra::VarnodeData* v);
 
-class PcodeEmitCacher : public PcodeEmit
+class PcodeEmitCacher : public ghidra::PcodeEmit
 {
 public:
-    uintm m_uniq;
+    ghidra::uintm m_uniq;
     std::vector<maat::ir::Inst> m_insts;
     TranslationContext* translation_ctx;
 
@@ -208,8 +209,8 @@ public:
     PcodeEmitCacher(TranslationContext* ctx) : m_uniq(0), translation_ctx(ctx)
     {}
 
-    void dump(const Address &addr, OpCode opc, VarnodeData *outvar,
-              VarnodeData *vars, int4 isize)
+    void dump(const ghidra::Address &addr, ghidra::OpCode opc, ghidra::VarnodeData *outvar,
+              ghidra::VarnodeData *vars, ghidra::int4 isize)
     {
         assert(isize > 0);
 
@@ -242,12 +243,12 @@ public:
 
 
 static std::string missing_str = "<missing asm>";
-class AssemblyEmitCacher : public AssemblyEmit
+class AssemblyEmitCacher : public ghidra::AssemblyEmit
 {
 public:
     std::map<uintptr_t, std::string> cache;
 
-    void dump(const Address &addr, const string &mnem, const string &body)
+    void dump(const ghidra::Address &addr, const ghidra::string &mnem, const ghidra::string &body)
     {
         cache[addr.getOffset()] = mnem + " " + body;
     }
@@ -282,17 +283,17 @@ public:
 class TranslationContext
 {
 public:
-    SimpleLoadImage     m_loader;
-    ContextInternal     m_context_internal;
-    DocumentStorage     m_document_storage;
-    Document           *m_document;
-    Element            *m_tags;
-    unique_ptr<Sleigh>  m_sleigh;
-    string              m_register_name_cache;
-    TmpCache            tmp_cache;
-    maat::Arch::Type    arch;
-    AssemblyEmitCacher  asm_cache;
-    std::unordered_map<uintm, maat::callother::Id> callother_mapping;
+    SimpleLoadImage                  m_loader;
+    ghidra::ContextInternal          m_context_internal;
+    ghidra::DocumentStorage          m_document_storage;
+    ghidra::Document                *m_document;
+    ghidra::Element                 *m_tags;
+    std::unique_ptr<ghidra::Sleigh>  m_sleigh;
+    ghidra::string                   m_register_name_cache;
+    TmpCache                         tmp_cache;
+    maat::Arch::Type                 arch;
+    AssemblyEmitCacher               asm_cache;
+    std::unordered_map<ghidra::uintm, maat::callother::Id> callother_mapping;
 
     TranslationContext(maat::Arch::Type a, const std::string& slafile, const std::string& pspecfile): arch(a)
     {
@@ -316,14 +317,20 @@ public:
 
     bool loadSlaFile(const char *path)
     {
+        std::string sleigh_xml = "<sleigh>" + std::string(path) + "</sleigh>";
+        std::istringstream xml_stream{sleigh_xml};
         LOG("%p Loading slafile...", this);
+        try {
+            m_document = m_document_storage.parseDocument(xml_stream);
+        } catch(ghidra::DecoderError &err) {
+            LOG("Failed opening/parsing document: %s", err.explain.c_str());
+        }
         // TODO try/catch XmlError
-        m_document = m_document_storage.openDocument(path);
         m_tags = m_document->getRoot();
         m_document_storage.registerTag(m_tags);
 
         LOG("Setting up translator");
-        m_sleigh.reset(new Sleigh(&m_loader, &m_context_internal));
+        m_sleigh.reset(new ghidra::Sleigh(&m_loader, &m_context_internal));
         m_sleigh->initialize(m_document_storage);
 
         return true;
@@ -332,21 +339,21 @@ public:
     bool loadPspecFile(const char *path)
     {
         LOG("%p Loading pspec file...", this);
-        DocumentStorage storage;
-        Element *root = storage.openDocument(path)->getRoot();
+        ghidra::DocumentStorage storage;
+        ghidra::Element *root = storage.openDocument(path)->getRoot();
         if (root == NULL)
             return false;
         std::string name;
         std::string value;
-        for (Element* elem : root->getChildren())
+        for (ghidra::Element* elem : root->getChildren())
         {
             if (elem->getName() != "context_data")
                 continue;
-            for (Element* child : elem->getChildren())
+            for (ghidra::Element* child : elem->getChildren())
             {
                 if (child->getName() == "context_set")
                 {
-                    for (Element* item : child->getChildren())
+                    for (ghidra::Element* item : child->getChildren())
                     {
                         if (item->getName() == "set")
                         {
@@ -363,7 +370,7 @@ public:
     }
 
 
-    const std::string& get_asm(uintb address, const unsigned char* bytes)
+    const std::string& get_asm(ghidra::uintb address, const unsigned char* bytes)
     {
         // TODO: force relifting everytime until we support clearing the
         // asm cache on X memory overwrites
@@ -372,8 +379,8 @@ public:
 
         // Get asm
         // 16 bytes is the max instruction length supported by sleigh
-        m_loader.setData(address, bytes, 16); 
-        Address addr(m_sleigh->getDefaultCodeSpace(), address);
+        m_loader.setData(address, bytes, 16);
+        ghidra::Address addr(m_sleigh->getDefaultCodeSpace(), address);
         m_sleigh->printAssembly(asm_cache, addr);
 
         return asm_cache.get_asm(address);
@@ -383,13 +390,13 @@ public:
         ir::IRMap& ir_map,
         const unsigned char *bytes,
         unsigned int num_bytes,
-        uintb address,
+        ghidra::uintb address,
         unsigned int max_instructions,
         bool bb_terminating
     )
     {
         unsigned int    inst_count = 0;
-        int4            offset = 0;
+        ghidra::uint4            offset = 0;
         bool            end_bb = false;
 
         PcodeEmitCacher    m_pcode(this);
@@ -409,10 +416,10 @@ public:
         {
             try
             {
-                Address addr(m_sleigh->getDefaultCodeSpace(), address + offset);
+                ghidra::Address addr(m_sleigh->getDefaultCodeSpace(), address + offset);
                 
                 // Get instruction length
-                int4 ilen = m_sleigh->instructionLength(addr);
+                ghidra::uint4 ilen = m_sleigh->instructionLength(addr);
 
                 // Process pcode for this instruction
                 tmp_cache.clear();
@@ -443,13 +450,13 @@ public:
                         addr_t tmp_addr = address + offset -ilen;
                         m_sleigh->printAssembly(
                             tmp_cacher,
-                            Address(m_sleigh->getDefaultCodeSpace(), tmp_addr)
+                            ghidra::Address(m_sleigh->getDefaultCodeSpace(), tmp_addr)
                         );
                         std::string mnem = tmp_cacher.get_mnemonic(tmp_addr);
                         // Get callother id in maat
                         callother::Id id = callother::Id::UNSUPPORTED;
                         // Try using the sleigh symbol id directly
-                        uintm sleigh_pcodeop_id = inst.in[0].cst();
+                        ghidra::uintm sleigh_pcodeop_id = inst.in[0].cst();
                         auto match = callother_mapping.find(sleigh_pcodeop_id);
                         if (match != callother_mapping.end())
                             id = match->second;
@@ -501,13 +508,13 @@ public:
                 // Add AsmInst to the IR map
                 ir_map.add(std::move(asm_inst));
 
-            } catch (UnimplError &e) {
+            } catch (ghidra::UnimplError &e) {
                 throw maat::lifter_exception(
                     Fmt() << "Sleigh raised an unimplemented exception: " << e.explain
                     >> Fmt::to_str
                 );
 
-            } catch (BadDataError &e) {
+            } catch (ghidra::BadDataError &e) {
                 throw maat::lifter_exception(
                     Fmt() << "Sleigh raised a bad data exception: " << e.explain
                     >> Fmt::to_str
@@ -516,14 +523,14 @@ public:
         }
     }
 
-    const std::string getRegisterName(AddrSpace* as, uintb off, int4 size)
+    const std::string getRegisterName(ghidra::AddrSpace* as, ghidra::uintb off, ghidra::uint4 size)
     {
         return m_sleigh->getRegisterName(as, off, size);
     }
 
     void build_callother_mapping_EVM()
     {
-        SleighSymbol* symbol = nullptr;
+        ghidra::SleighSymbol* symbol = nullptr;
         // Note: the operator names MUST match the names in EVM.slaspec
         std::unordered_map<std::string, callother::Id> operators = {
             {"stack_pop",callother::Id::EVM_STACK_POP}, 
@@ -566,12 +573,12 @@ public:
                     Fmt() << "Error instanciating sleigh lifter, didn't find symbol for operator "
                     << op_str >> Fmt::to_str
                 );
-            if (symbol->getType() != SleighSymbol::symbol_type::userop_symbol)
+            if (symbol->getType() != ghidra::SleighSymbol::symbol_type::userop_symbol)
                 throw lifter_exception(
                     Fmt() << "Error instanciating sleigh lifter, wrong symbol type for operator "
                     << op_str >> Fmt::to_str
                 );
-            callother_mapping[((UserOpSymbol*)symbol)->getIndex()] = op_id;
+            callother_mapping[((ghidra::UserOpSymbol*)symbol)->getIndex()] = op_id;
         }
     }
 };
@@ -579,12 +586,12 @@ public:
 // Translate a sleigh register name into a maat::ir::Param register
 maat::ir::Param reg_name_to_maat_reg(maat::Arch::Type arch, const std::string& reg_name);
 // Translate a pcode varnode into an parameter and add it to inst
-maat::ir::Param translate_pcode_param(TranslationContext* ctx, VarnodeData* v)
+maat::ir::Param translate_pcode_param(TranslationContext* ctx, ghidra::VarnodeData* v)
 {
     assert(v->space != NULL);
 
     // Check if constant
-    Address addr(v->space, v->offset);
+    ghidra::Address addr(v->space, v->offset);
     if (addr.isConstant())
     {
         return maat::ir::Cst(v->offset, v->size*8);
@@ -672,82 +679,82 @@ const std::string& sleigh_get_asm(
     return ctx->get_asm(address, bytes);
 }
 
-std::string opcode_to_str(OpCode op)
+std::string opcode_to_str(ghidra::OpCode op)
 {
     std::string res;
     switch (op)
     {
-        case OpCode::CPUI_COPY: res = "COPY"; break;
-        case OpCode::CPUI_LOAD: res = "LOAD"; break;
-        case OpCode::CPUI_STORE: res = "STORE"; break;
-        case OpCode::CPUI_BRANCH: res = "BRANCH"; break;            
-        case OpCode::CPUI_CBRANCH: res = "CBRANCH"; break;           
-        case OpCode::CPUI_BRANCHIND: res = "BRANCHIND"; break;
-        case OpCode::CPUI_CALL: res = "CALL"; break;         
-        case OpCode::CPUI_CALLIND: res = "CALLIND"; break;           
-        case OpCode::CPUI_CALLOTHER: res = "CALLOTHER"; break;         
-        case OpCode::CPUI_RETURN: res = "RETURN"; break;            
-        case OpCode::CPUI_INT_EQUAL: res = "INT_EQUAL"; break;        
-        case OpCode::CPUI_INT_NOTEQUAL: res = "INT_NOTEQUAL"; break;     
-        case OpCode::CPUI_INT_SLESS: res = "INT_SLESS"; break;        
-        case OpCode::CPUI_INT_SLESSEQUAL: res = "INT_SLESSEQUAL"; break;   
-        case OpCode::CPUI_INT_LESS: res = "INT_LESS"; break;         
-        case OpCode::CPUI_INT_LESSEQUAL: res = "INT_LESSEQUAL"; break;     
-        case OpCode::CPUI_INT_ZEXT: res = "INT_ZEXT"; break;         
-        case OpCode::CPUI_INT_SEXT: res = "INT_SEXT"; break;         
-        case OpCode::CPUI_INT_ADD: res = "INT_ADD"; break;           
-        case OpCode::CPUI_INT_SUB: res = "INT_SUB"; break;           
-        case OpCode::CPUI_INT_CARRY: res = "INT_CARRY"; break;        
-        case OpCode::CPUI_INT_SCARRY: res = "INT_SCARRY"; break;        
-        case OpCode::CPUI_INT_SBORROW: res = "INT_SBORROW"; break;       
-        case OpCode::CPUI_INT_2COMP: res = "INT_2COMP"; break;         
-        case OpCode::CPUI_INT_NEGATE: res = "INT_NEGATE"; break;        
-        case OpCode::CPUI_INT_XOR: res = "INT_XOR"; break;           
-        case OpCode::CPUI_INT_AND: res = "INT_AND"; break;           
-        case OpCode::CPUI_INT_OR: res = "INT_OR"; break;           
-        case OpCode::CPUI_INT_LEFT: res = "INT_SHL"; break;          
-        case OpCode::CPUI_INT_RIGHT: res = "INT_SHR"; break;        
-        case OpCode::CPUI_INT_SRIGHT: res = "INT_SAR"; break;       
-        case OpCode::CPUI_INT_MULT: res = "INT_MULT"; break;         
-        case OpCode::CPUI_INT_DIV: res = "INT_DIV"; break;          
-        case OpCode::CPUI_INT_SDIV: res = "INT_SDIV"; break;         
-        case OpCode::CPUI_INT_REM: res = "INT_REM"; break;          
-        case OpCode::CPUI_INT_SREM: res = "INT_SREM"; break;         
-        case OpCode::CPUI_BOOL_NEGATE: res = "BOOL_NEGATE"; break;     
-        case OpCode::CPUI_BOOL_XOR: res = "BOOL_XOR"; break;         
-        case OpCode::CPUI_BOOL_AND: res = "BOOL_AND"; break;         
-        case OpCode::CPUI_BOOL_OR: res = "BOOL_OR"; break;          
-        case OpCode::CPUI_FLOAT_EQUAL: res = "FLOAT_EQUAL"; break;      
-        case OpCode::CPUI_FLOAT_NOTEQUAL: res = "FLOAT_NOTEQUAL"; break;  
-        case OpCode::CPUI_FLOAT_LESS: res = "FLOAT_LESS"; break;      
-        case OpCode::CPUI_FLOAT_LESSEQUAL: res = "FLOAT_LESSEQUAL"; break;            
-        case OpCode::CPUI_FLOAT_NAN: res = "FLOAT_NAN"; break;         
-        case OpCode::CPUI_FLOAT_ADD: res = "FLOAT_ADD"; break;         
-        case OpCode::CPUI_FLOAT_DIV: res = "FLOAT_DIV"; break;        
-        case OpCode::CPUI_FLOAT_MULT: res = "FLOAT_MULT"; break;       
-        case OpCode::CPUI_FLOAT_SUB: res = "FLOAT_SUB"; break;        
-        case OpCode::CPUI_FLOAT_NEG: res = "FLOAT_NEG"; break;        
-        case OpCode::CPUI_FLOAT_ABS: res = "FLOAT_ABS"; break;        
-        case OpCode::CPUI_FLOAT_SQRT: res = "FLOAT_SQRT"; break;      
-        case OpCode::CPUI_FLOAT_INT2FLOAT: res = "FLOAT_INT2FLOAT"; break;  
-        case OpCode::CPUI_FLOAT_FLOAT2FLOAT: res = "FLOAT_FLOAT2FLOAT"; break;
-        case OpCode::CPUI_FLOAT_TRUNC: res = "FLOAT_TRUNC"; break;     
-        case OpCode::CPUI_FLOAT_CEIL: res = "FLOAT_CEIL"; break;      
-        case OpCode::CPUI_FLOAT_FLOOR: res = "FLOAT_FLOOR"; break;      
-        case OpCode::CPUI_FLOAT_ROUND: res = "FLOAT_ROUND"; break;
-        case OpCode::CPUI_MULTIEQUAL: res = "MULTIEQUAL"; break;     
-        case OpCode::CPUI_INDIRECT: res = "INDIRECT"; break;        
-        case OpCode::CPUI_PIECE: res = "PIECE"; break;           
-        case OpCode::CPUI_SUBPIECE: res = "SUBPIECE"; break;        
-        case OpCode::CPUI_CAST: res = "CAST"; break;           
-        case OpCode::CPUI_PTRADD: res = "PTRADD"; break;           
-        case OpCode::CPUI_PTRSUB: res = "PTRSUB"; break;         
-        case OpCode::CPUI_SEGMENTOP: res = "SEGMENTOP"; break;       
-        case OpCode::CPUI_CPOOLREF: res = "CPOOLREF"; break;         
-        case OpCode::CPUI_NEW: res = "NEW"; break;              
-        case OpCode::CPUI_INSERT: res = "INSERT"; break;          
-        case OpCode::CPUI_EXTRACT: res = "EXTRACT"; break;          
-        case OpCode::CPUI_POPCOUNT: res = "POPCOUNT"; break;          
+        case ghidra::OpCode::CPUI_COPY: res = "COPY"; break;
+        case ghidra::OpCode::CPUI_LOAD: res = "LOAD"; break;
+        case ghidra::OpCode::CPUI_STORE: res = "STORE"; break;
+        case ghidra::OpCode::CPUI_BRANCH: res = "BRANCH"; break;
+        case ghidra::OpCode::CPUI_CBRANCH: res = "CBRANCH"; break;
+        case ghidra::OpCode::CPUI_BRANCHIND: res = "BRANCHIND"; break;
+        case ghidra::OpCode::CPUI_CALL: res = "CALL"; break;
+        case ghidra::OpCode::CPUI_CALLIND: res = "CALLIND"; break;
+        case ghidra::OpCode::CPUI_CALLOTHER: res = "CALLOTHER"; break;
+        case ghidra::OpCode::CPUI_RETURN: res = "RETURN"; break;
+        case ghidra::OpCode::CPUI_INT_EQUAL: res = "INT_EQUAL"; break;
+        case ghidra::OpCode::CPUI_INT_NOTEQUAL: res = "INT_NOTEQUAL"; break;
+        case ghidra::OpCode::CPUI_INT_SLESS: res = "INT_SLESS"; break;
+        case ghidra::OpCode::CPUI_INT_SLESSEQUAL: res = "INT_SLESSEQUAL"; break;
+        case ghidra::OpCode::CPUI_INT_LESS: res = "INT_LESS"; break;
+        case ghidra::OpCode::CPUI_INT_LESSEQUAL: res = "INT_LESSEQUAL"; break;
+        case ghidra::OpCode::CPUI_INT_ZEXT: res = "INT_ZEXT"; break;
+        case ghidra::OpCode::CPUI_INT_SEXT: res = "INT_SEXT"; break;
+        case ghidra::OpCode::CPUI_INT_ADD: res = "INT_ADD"; break;
+        case ghidra::OpCode::CPUI_INT_SUB: res = "INT_SUB"; break;
+        case ghidra::OpCode::CPUI_INT_CARRY: res = "INT_CARRY"; break;
+        case ghidra::OpCode::CPUI_INT_SCARRY: res = "INT_SCARRY"; break;
+        case ghidra::OpCode::CPUI_INT_SBORROW: res = "INT_SBORROW"; break;
+        case ghidra::OpCode::CPUI_INT_2COMP: res = "INT_2COMP"; break;
+        case ghidra::OpCode::CPUI_INT_NEGATE: res = "INT_NEGATE"; break;
+        case ghidra::OpCode::CPUI_INT_XOR: res = "INT_XOR"; break;
+        case ghidra::OpCode::CPUI_INT_AND: res = "INT_AND"; break;
+        case ghidra::OpCode::CPUI_INT_OR: res = "INT_OR"; break;
+        case ghidra::OpCode::CPUI_INT_LEFT: res = "INT_SHL"; break;
+        case ghidra::OpCode::CPUI_INT_RIGHT: res = "INT_SHR"; break;
+        case ghidra::OpCode::CPUI_INT_SRIGHT: res = "INT_SAR"; break;
+        case ghidra::OpCode::CPUI_INT_MULT: res = "INT_MULT"; break;
+        case ghidra::OpCode::CPUI_INT_DIV: res = "INT_DIV"; break;
+        case ghidra::OpCode::CPUI_INT_SDIV: res = "INT_SDIV"; break;
+        case ghidra::OpCode::CPUI_INT_REM: res = "INT_REM"; break;
+        case ghidra::OpCode::CPUI_INT_SREM: res = "INT_SREM"; break;
+        case ghidra::OpCode::CPUI_BOOL_NEGATE: res = "BOOL_NEGATE"; break;
+        case ghidra::OpCode::CPUI_BOOL_XOR: res = "BOOL_XOR"; break;
+        case ghidra::OpCode::CPUI_BOOL_AND: res = "BOOL_AND"; break;
+        case ghidra::OpCode::CPUI_BOOL_OR: res = "BOOL_OR"; break;
+        case ghidra::OpCode::CPUI_FLOAT_EQUAL: res = "FLOAT_EQUAL"; break;
+        case ghidra::OpCode::CPUI_FLOAT_NOTEQUAL: res = "FLOAT_NOTEQUAL"; break;
+        case ghidra::OpCode::CPUI_FLOAT_LESS: res = "FLOAT_LESS"; break;
+        case ghidra::OpCode::CPUI_FLOAT_LESSEQUAL: res = "FLOAT_LESSEQUAL"; break;
+        case ghidra::OpCode::CPUI_FLOAT_NAN: res = "FLOAT_NAN"; break;
+        case ghidra::OpCode::CPUI_FLOAT_ADD: res = "FLOAT_ADD"; break;
+        case ghidra::OpCode::CPUI_FLOAT_DIV: res = "FLOAT_DIV"; break;
+        case ghidra::OpCode::CPUI_FLOAT_MULT: res = "FLOAT_MULT"; break;
+        case ghidra::OpCode::CPUI_FLOAT_SUB: res = "FLOAT_SUB"; break;
+        case ghidra::OpCode::CPUI_FLOAT_NEG: res = "FLOAT_NEG"; break;
+        case ghidra::OpCode::CPUI_FLOAT_ABS: res = "FLOAT_ABS"; break;
+        case ghidra::OpCode::CPUI_FLOAT_SQRT: res = "FLOAT_SQRT"; break;
+        case ghidra::OpCode::CPUI_FLOAT_INT2FLOAT: res = "FLOAT_INT2FLOAT"; break;
+        case ghidra::OpCode::CPUI_FLOAT_FLOAT2FLOAT: res = "FLOAT_FLOAT2FLOAT"; break;
+        case ghidra::OpCode::CPUI_FLOAT_TRUNC: res = "FLOAT_TRUNC"; break;
+        case ghidra::OpCode::CPUI_FLOAT_CEIL: res = "FLOAT_CEIL"; break;
+        case ghidra::OpCode::CPUI_FLOAT_FLOOR: res = "FLOAT_FLOOR"; break;
+        case ghidra::OpCode::CPUI_FLOAT_ROUND: res = "FLOAT_ROUND"; break;
+        case ghidra::OpCode::CPUI_MULTIEQUAL: res = "MULTIEQUAL"; break;
+        case ghidra::OpCode::CPUI_INDIRECT: res = "INDIRECT"; break;
+        case ghidra::OpCode::CPUI_PIECE: res = "PIECE"; break;
+        case ghidra::OpCode::CPUI_SUBPIECE: res = "SUBPIECE"; break;
+        case ghidra::OpCode::CPUI_CAST: res = "CAST"; break;
+        case ghidra::OpCode::CPUI_PTRADD: res = "PTRADD"; break;
+        case ghidra::OpCode::CPUI_PTRSUB: res = "PTRSUB"; break;
+        case ghidra::OpCode::CPUI_SEGMENTOP: res = "SEGMENTOP"; break;
+        case ghidra::OpCode::CPUI_CPOOLREF: res = "CPOOLREF"; break;
+        case ghidra::OpCode::CPUI_NEW: res = "NEW"; break;
+        case ghidra::OpCode::CPUI_INSERT: res = "INSERT"; break;
+        case ghidra::OpCode::CPUI_EXTRACT: res = "EXTRACT"; break;
+        case ghidra::OpCode::CPUI_POPCOUNT: res = "POPCOUNT"; break;
         default: res = "????"; break;
     }
     return res;
