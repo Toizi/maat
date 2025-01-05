@@ -10,3 +10,4 @@ CMakeUserPresets.json
 maat_state_*
 .cache
 __pycache__
+compile_commands.json
