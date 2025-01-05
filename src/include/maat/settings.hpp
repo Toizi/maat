@@ -60,6 +60,8 @@ public:
     bool log_insts;
     /// Log every executed syscall/function (whose symbol is known to the engine)
     bool log_calls;
+    /// Log every executed IR instruction
+    bool log_ir;
 public:
     Settings();
     virtual ~Settings() = default;

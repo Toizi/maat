@@ -18,7 +18,8 @@ Settings::Settings():
     symptr_refine_range(true),
     symptr_refine_timeout(10000), // in milliseconds
     log_insts(false),
-    log_calls(false)
+    log_calls(false),
+    log_ir(false)
 {}
 
 std::string bool_to_string(bool val)
@@ -41,6 +42,7 @@ std::ostream& operator<<(std::ostream& os, const Settings& s)
     os << "symptr_refine_timeout: " << std::dec << s.symptr_refine_timeout << " ms\n";
     os << "log_insts: " << bool_to_string(s.log_insts) << "\n";
     os << "log_calls: " << bool_to_string(s.log_calls) << "\n";
+    os << "log_ir: " << bool_to_string(s.log_ir) << "\n";
     return os;
 }
 
@@ -55,7 +57,7 @@ void Settings::dump(serial::Serializer& s) const
       << bits(ignore_missing_syscalls) << bits(record_path_constraints)
       << bits(symptr_read) << bits(symptr_write) << bits(symptr_assume_aligned)
       << bits(symptr_limit_range) << bits(symptr_max_range) << bits(symptr_refine_range)
-      << bits(symptr_refine_timeout) << bits(log_insts) << bits(log_calls);
+      << bits(symptr_refine_timeout) << bits(log_insts) << bits(log_calls) << bits(log_ir);
 }
 
 void Settings::load(serial::Deserializer& d)
@@ -64,7 +66,7 @@ void Settings::load(serial::Deserializer& d)
       >> bits(ignore_missing_syscalls) >> bits(record_path_constraints)
       >> bits(symptr_read) >> bits(symptr_write) >> bits(symptr_assume_aligned)
       >> bits(symptr_limit_range) >> bits(symptr_max_range) >> bits(symptr_refine_range)
-      >> bits(symptr_refine_timeout) >> bits(log_insts) >> bits(log_calls);
+      >> bits(symptr_refine_timeout) >> bits(log_insts) >> bits(log_calls) >> bits(log_ir);
 }
 
 } // namespace maat

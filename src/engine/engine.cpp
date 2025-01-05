@@ -319,12 +319,12 @@ info::Stop MaatEngine::run(int max_inst)
             }
 
             // Get IR instruction to execute
-            const ir::Inst& inst = asm_inst->instructions()[ir_inst_id];            
+            const ir::Inst& inst = asm_inst->instructions()[ir_inst_id];
 
-            // TODO: add settings.log_ir option
-            // if settings.log_ir:
-            //      log.debug("Run IR: ", inst);
-            // std::cout << "DEBUG " << inst << std::endl;
+            if (settings.log_ir)
+            {
+                log.info("Run IR: ", inst);
+            }
 
             // Check for unsupported instruction
             if (inst.op == ir::Op::UNSUPPORTED)
@@ -414,7 +414,7 @@ info::Stop MaatEngine::run(int max_inst)
                 // Simplify only we set a register to a non concrete value
                 // or if the operation was a callother
                 if (
-                    pinst.res.is_abstract() 
+                    pinst.res.is_abstract()
                     and (inst.out.is_reg() or inst.op == ir::Op::CALLOTHER)
                     and not pinst.res.expr()->is_concrete(*vars)
                 )

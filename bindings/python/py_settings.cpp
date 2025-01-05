@@ -163,6 +163,15 @@ static int Settings_set_print_calls(PyObject* self, PyObject* val, void* closure
     return 0;
 }
 
+static PyObject* Settings_get_print_ir(PyObject* self, void* closure){
+    return PyBool_FromLong((long)as_settings_object(self).settings->log_ir);
+}
+
+static int Settings_set_print_ir(PyObject* self, PyObject* val, void* closure){
+    as_settings_object(self).settings->log_ir = (bool)PyObject_IsTrue(val);
+    return 0;
+}
+
 static PyGetSetDef Settings_getset[] = {
     {"symptr_refine_timeout", Settings_get_symptr_refine_timeout, Settings_set_symptr_refine_timeout, "Maximum time to spend on symbolic pointer range refinement (in milliseconds, per pointer)", NULL},
     {"symptr_max_range", Settings_get_symptr_max_range, Settings_set_symptr_max_range, "Maximum range of possible values for symbolic pointers"},
@@ -177,6 +186,7 @@ static PyGetSetDef Settings_getset[] = {
     {"symptr_refine_range", Settings_get_symptr_refine_range, Settings_set_symptr_refine_range, "Refine the range of symbolic pointers using the SMT solver"},
     {"log_insts", Settings_get_print_insts, Settings_set_print_insts, "Log every executed instruction"},
     {"log_calls", Settings_get_print_calls, Settings_set_print_calls, "Log calls to functions and system calls"},
+    {"log_ir", Settings_get_print_ir, Settings_set_print_ir, "Log every executed IR instruction"},
     {NULL}
 };
 
