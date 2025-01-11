@@ -136,7 +136,7 @@ if(NOT CMAKE_SKIP_INSTALL_RULES)
   add_custom_command(OUTPUT "${PYI_OUTPUT_PATH}"
     # TODO: add "--fail-on-missing-sig" flag after all docs have been added
     COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_LIST_DIR}/generate_pyi.py" "${PYI_OUTPUT_PATH}" "--module-path=$<TARGET_FILE:maat_python>"
-    DEPENDS "${CMAKE_CURRENT_LIST_DIR}/generate_pyi.py"
+    DEPENDS "${CMAKE_CURRENT_LIST_DIR}/generate_pyi.py" maat_python
   )
   # need a custom target ALL to also rebuild if generate_pyi.py changed
   add_custom_target(generate_pyi ALL
