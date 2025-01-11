@@ -4,7 +4,7 @@ namespace maat{
 namespace py{
 
 // ============= MaatEngine ==================
-PyDoc_STRVAR(maat_MaatEngine_doc, R"EOF(MaatEngine(arch: ARCH, system: OS=OS.None)
+PyDoc_STRVAR(maat_MaatEngine_doc, R"EOF(MaatEngine(arch: ARCH, system: OS=OS.NONE)
 
 Create a new DSE engine
 )EOF");
@@ -31,6 +31,12 @@ static void MaatEngine_dealloc(PyObject* self)
     Py_TYPE(self)->tp_free((PyObject *)self);
 };
 
+PyDoc_STRVAR(
+    MaatEngine_duplicate_doc,
+    "_duplicate(duplicate: set[str]={}, share: set[str]={}) -> MaatEngine\n"
+    "\n"
+    "Duplicate a symbolic engine."
+);
 static PyObject* MaatEngine_duplicate(PyObject* self, PyObject* args, PyObject* keywords)
 {
     static char *kwlist[] = {"duplicate", "share", NULL};
@@ -65,6 +71,11 @@ static PyObject* MaatEngine_duplicate(PyObject* self, PyObject* args, PyObject* 
     return PyMaatEngine_FromMaatEngine(new_engine);
 };
 
+PyDoc_STRVAR(MaatEngine_run_doc,
+    "run(max_instr: int=0) -> STOP\n"
+    "\n"
+    "Continue to run code from current location"
+);
 static PyObject* MaatEngine_run(PyObject* self, PyObject* args){
     unsigned int max_instr = 0;
     info::Stop res;
@@ -82,6 +93,12 @@ static PyObject* MaatEngine_run(PyObject* self, PyObject* args){
     return PyLong_FromLong((int)res);
 };
 
+PyDoc_STRVAR(
+    MaatEngine_run_from_doc,
+    "run_from(addr: int, max_instr:int=0) -> STOP\n"
+    "\n"
+    "Run code from a given address"
+);
 static PyObject* MaatEngine_run_from(PyObject* self, PyObject* args){
     unsigned long long addr;
     unsigned int max_instr = 0;
@@ -101,6 +118,12 @@ static PyObject* MaatEngine_run_from(PyObject* self, PyObject* args){
 };
 
 
+PyDoc_STRVAR(
+    MaatEngine_take_snapshot_doc,
+    "take_snapshot() -> int\n"
+    "\n"
+    "Take a snapshot and return the snapshot ID"
+);
 static PyObject* MaatEngine_take_snapshot(PyObject* self){
     unsigned int snap_id;
     
@@ -108,6 +131,14 @@ static PyObject* MaatEngine_take_snapshot(PyObject* self){
     return PyLong_FromLong(snap_id);
 };
 
+PyDoc_STRVAR(
+    MaatEngine_restore_snapshot_doc,
+    "restore_snapshot(snapshot_id: int=-1, remove: bool=False)\n"
+    "\n"
+    "Restore a snapshot.\n"
+    ":param int snapshot_id: ID of the snapshot to restore. If omitted, restore the latest snapshot\n"
+    ":param bool remove: If True, delete the snapshot after restoring it"
+);
 static PyObject* MaatEngine_restore_snapshot(PyObject* self, PyObject* args, PyObject* keywords){
     int id = -1;
     int remove = 0;
@@ -133,6 +164,13 @@ static PyObject* MaatEngine_restore_snapshot(PyObject* self, PyObject* args, PyO
     Py_RETURN_NONE;
 };
 
+PyDoc_STRVAR(
+    MaatEngine_load_doc,
+    "load(binary: str, type_: BIN, base:int=0, args=[], envp={}, libdirs=[], ignore_libs=[], virtual_fs={}, load_interp:bool=True)\n"
+    "\n"
+    "Load an executable binary in the engine.\n"
+    "Params: TODO"
+);
 static PyObject* MaatEngine_load(PyObject* self, PyObject* args, PyObject* keywords){
     char * name;
     int bin_type = (int)loader::Format::NONE;
@@ -328,6 +366,12 @@ static PyGetSetDef MaatEngine_getset[] = {
     {NULL}
 };
 
+PyDoc_STRVAR(
+    MaatEngine_get_inst_asm_doc,
+    "get_inst_asm() -> str\n"
+    "\n"
+    "Get the assembly code of an instruction"
+);
 static PyObject* MaatEngine_get_inst_asm(PyObject* self, PyObject* args){
     unsigned long long addr;
     
@@ -345,6 +389,12 @@ static PyObject* MaatEngine_get_inst_asm(PyObject* self, PyObject* args){
     }
 };
 
+PyDoc_STRVAR(
+    MaatEngine_get_inst_bytes_doc,
+    "get_inst_bytes(addr: int) -> bytes\n"
+    "\n"
+    "Get the raw bytes of an instruction"
+);
 static PyObject* MaatEngine_get_inst_bytes(PyObject* self, PyObject* args){
     unsigned long long addr;
     
@@ -363,14 +413,14 @@ static PyObject* MaatEngine_get_inst_bytes(PyObject* self, PyObject* args){
 };
 
 static PyMethodDef MaatEngine_methods[] = {
-    {"run", (PyCFunction)MaatEngine_run, METH_VARARGS, "Continue to run code from current location"},
-    {"run_from", (PyCFunction)MaatEngine_run_from, METH_VARARGS, "Run code from a given address"},
-    {"take_snapshot", (PyCFunction)MaatEngine_take_snapshot, METH_NOARGS, "Take a snapshot of the symbolic engine"},
-    {"restore_snapshot", (PyCFunction)MaatEngine_restore_snapshot, METH_VARARGS | METH_KEYWORDS, "Restore a snapshot of the symbolic engine"},
-    {"load", (PyCFunction)MaatEngine_load, METH_VARARGS | METH_KEYWORDS, "Load an executable"},
-    {"_duplicate", (PyCFunction)MaatEngine_duplicate, METH_VARARGS | METH_KEYWORDS, "Duplicate a symbolic engine"},
-    {"get_inst_asm", (PyCFunction)MaatEngine_get_inst_asm, METH_VARARGS, "Get assembly code of an instruction"},
-    {"get_inst_bytes", (PyCFunction)MaatEngine_get_inst_bytes, METH_VARARGS, "Get raw bytes of an instruction"},
+    {"run", (PyCFunction)MaatEngine_run, METH_VARARGS, MaatEngine_run_doc},
+    {"run_from", (PyCFunction)MaatEngine_run_from, METH_VARARGS, MaatEngine_run_from_doc},
+    {"take_snapshot", (PyCFunction)MaatEngine_take_snapshot, METH_NOARGS, MaatEngine_take_snapshot_doc},
+    {"restore_snapshot", (PyCFunction)MaatEngine_restore_snapshot, METH_VARARGS | METH_KEYWORDS, MaatEngine_restore_snapshot_doc},
+    {"load", (PyCFunction)MaatEngine_load, METH_VARARGS | METH_KEYWORDS, MaatEngine_load_doc},
+    {"_duplicate", (PyCFunction)MaatEngine_duplicate, METH_VARARGS | METH_KEYWORDS, MaatEngine_duplicate_doc},
+    {"get_inst_asm", (PyCFunction)MaatEngine_get_inst_asm, METH_VARARGS, MaatEngine_get_inst_asm_doc},
+    {"get_inst_bytes", (PyCFunction)MaatEngine_get_inst_bytes, METH_VARARGS, MaatEngine_get_inst_bytes_doc},
     {NULL, NULL, 0, NULL}
 };
 

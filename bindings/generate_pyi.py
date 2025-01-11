@@ -19,7 +19,7 @@ def get_signature(func) -> str:
         err = f'signature does not start with function name: {sig}'
     elif func_name not in sig:
         err = f'function name {func_name} not found in {sig}'
-    elif sig.index('(') >= sig.index(')'):
+    elif sig.find('(') >= sig.find(')'):
         if '(' not in sig:
             err = f'signature does not contain parentheses: {sig}'
         else:
@@ -28,6 +28,27 @@ def get_signature(func) -> str:
     if err:
         raise SignatureError(f"Could not find signature in first line of {func_name}.__doc__, fix docs.\n  Err: {err}")
     return sig
+
+def method_def(obj, function_name, fail_on_sig_err) -> str:
+    s = ''
+    try:
+        sig = get_signature(obj)
+        print(sig)
+        # replace function name in case we have a different one.
+        # this is mainly relevant for __init__ since the docstring sits on the class
+        # and needs to be transferred to __init__
+        sig = function_name + '(self, ' + sig[sig.index('(') + 1:]
+    except SignatureError as err:
+        if fail_on_sig_err:
+            raise
+        else:
+            print(f"warning: {err}")
+            sig = f'{function_name}(self, *args, **kwargs)'
+
+    s += f'    def {sig}:\n'
+    s += f"        '''{obj.__doc__}'''\n"
+    s += "        ...\n\n"
+    return s
 
 def import_module(module_path):
     # if a custom module path is provided, add the directory of the file to the first entry in our sys.path
@@ -54,6 +75,9 @@ def generate_pyi(module , fail_on_sig_err: bool) -> str:
             s += f'class {classdef}:\n'
             s += f"    '''{obj.__doc__}'''\n\n"
 
+            if hasattr(obj, '__init__'):
+                s += method_def(obj, '__init__', fail_on_sig_err)
+
             for member_name, member in inspect.getmembers(obj):
                 if not member_name.startswith('__') and member_name != '_enum_docs':
                     print(member_name)
@@ -62,18 +86,7 @@ def generate_pyi(module , fail_on_sig_err: bool) -> str:
                         if member.__doc__:
                             s += f"    '''{obj._enum_docs[member_name]}'''\n"
                     else:
-                        try:
-                            sig = get_signature(member)
-                        except SignatureError as err:
-                            if fail_on_sig_err:
-                                raise
-                            else:
-                                print(f"warning: {err}")
-                                sig = f'{member_name}(self, *args, **kwargs)'
-
-                        s += f'    def {sig}:\n'
-                        s += f"        '''{member.__doc__}'''\n\n"
-                        s += "        ...\n\n"
+                        s += method_def(member, member_name, fail_on_sig_err)
     return s
 
 def main():
