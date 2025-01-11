@@ -59,13 +59,13 @@ enum class Event
     REG_R,
     /// Write a given register
     REG_W,
-    /// A combinaison of Event::REG_R and Event::REG_W
+    /// A combination of Event::REG_R and Event::REG_W
     REG_RW,
     /// Reading memory in a given address range
     MEM_R,
     /// Writing memory in a given address range
     MEM_W,
-    /// A combinaison of Event::MEM_R and Event::MEM_W
+    /// A combination of Event::MEM_R and Event::MEM_W
     MEM_RW,
     /// Executing a branch operation (conditional or absolute)
     BRANCH,
