@@ -119,7 +119,7 @@ if(NOT CMAKE_SKIP_INSTALL_RULES)
   install(
     TARGETS maat_python
     LIBRARY #
-    COMPONENT maat_Python
+    COMPONENT maat_python
     LIBRARY #
     DESTINATION "${maat_INSTALL_PYTHONMODULEDIR}"
   )
@@ -128,6 +128,24 @@ if(NOT CMAKE_SKIP_INSTALL_RULES)
   install(
     DIRECTORY "${PROJECT_BINARY_DIR}/${spec_out_prefix}/"
     DESTINATION "${maat_INSTALL_PYTHONMODULEDIR}/maat/${CMAKE_INSTALL_DATADIR}/${spec_out_prefix}"
-    COMPONENT maat_Python
+    COMPONENT maat_python
+  )
+
+  # name should be the generic name and not use any shared object abi suffix
+  set(PYI_OUTPUT_PATH "${maat_INSTALL_PYTHONMODULEDIR}/maat.pyi")
+  add_custom_command(OUTPUT "${PYI_OUTPUT_PATH}"
+    # TODO: add "--fail-on-missing-sig" flag after all docs have been added
+    COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_LIST_DIR}/generate_pyi.py" "${PYI_OUTPUT_PATH}" "--module-path=$<TARGET_FILE:maat_python>"
+    DEPENDS "${CMAKE_CURRENT_LIST_DIR}/generate_pyi.py"
+  )
+  # need a custom target ALL to also rebuild if generate_pyi.py changed
+  add_custom_target(generate_pyi ALL
+    DEPENDS "${PYI_OUTPUT_PATH}" "${CMAKE_CURRENT_LIST_DIR}/generate_pyi.py")
+
+  # install type info
+  install(
+    FILES ${PYI_OUTPUT_PATH}
+    COMPONENT maat_python
+    DESTINATION "${maat_INSTALL_PYTHONMODULEDIR}"
   )
 endif()
