@@ -21,8 +21,6 @@ PyMethodDef module_methods[] = {
     {"ULT", (PyCFunction)maat_ULT, METH_VARARGS, "Unsigned less-than constraint on abstract values"},
     {"Zext", (PyCFunction)maat_Zext, METH_VARARGS, "Zero-extend an abstract value"},
     {"ITE", (PyCFunction)maat_ITE, METH_VARARGS, "Create an If-Then-Else expression from a Constraint and two abstract expressions"},
-    // Engine
-    {"MaatEngine", (PyCFunction)maat_MaatEngine, METH_VARARGS, "Create a new DSE engine"},
     // Solver
     {"Solver", (PyCFunction)maat_Solver, METH_NOARGS, "Create a constraint solver"},
     // SimpleStateManager
@@ -51,7 +49,7 @@ PyModuleDef maat_module_def = {
     nullptr, // m_slots
     nullptr, // m_traverse
     nullptr, // m_clear
-    nullptr  // m_free    
+    nullptr  // m_free
 };
 
 std::optional<std::filesystem::path> get_maat_module_directory()

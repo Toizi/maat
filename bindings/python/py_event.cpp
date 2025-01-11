@@ -1,4 +1,5 @@
 #include "python_bindings.hpp"
+#include <boolobject.h>
 
 namespace maat{
 namespace py{
@@ -266,36 +267,46 @@ PyObject* PyEventManager_FromEventManager(event::EventManager* m, bool is_ref)
 void init_event(PyObject* module)
 {
     // EVENT enum
-    PyObject* event_enum = PyDict_New();
-    PyDict_SetItemString(event_enum, "EXEC", PyLong_FromLong((int)event::Event::EXEC));
-    PyDict_SetItemString(event_enum, "BRANCH", PyLong_FromLong((int)event::Event::BRANCH));
-    PyDict_SetItemString(event_enum, "MEM_R", PyLong_FromLong((int)event::Event::MEM_R));
-    PyDict_SetItemString(event_enum, "MEM_W", PyLong_FromLong((int)event::Event::MEM_W));
-    PyDict_SetItemString(event_enum, "MEM_RW", PyLong_FromLong((int)event::Event::MEM_RW));
-    PyDict_SetItemString(event_enum, "PATH", PyLong_FromLong((int)event::Event::PATH));
-    PyDict_SetItemString(event_enum, "REG_R", PyLong_FromLong((int)event::Event::REG_R));
-    PyDict_SetItemString(event_enum, "REG_W", PyLong_FromLong((int)event::Event::REG_W));
-    PyDict_SetItemString(event_enum, "REG_RW", PyLong_FromLong((int)event::Event::REG_RW));
+    PyObject* event_enum = new_enum();
+    assign_enum(event_enum, "EXEC", PyLong_FromLong((int)event::Event::EXEC),
+                "An instruction in a given address range is executed");
+    assign_enum(event_enum, "BRANCH", PyLong_FromLong((int)event::Event::BRANCH),
+                "A branch operation (conditional or absolute) is executed");
+    assign_enum(event_enum, "MEM_R", PyLong_FromLong((int)event::Event::MEM_R),
+                "A given address range is read");
+    assign_enum(event_enum, "MEM_W", PyLong_FromLong((int)event::Event::MEM_W),
+                "A given address range is written");
+    assign_enum(event_enum, "MEM_RW", PyLong_FromLong((int)event::Event::MEM_RW),
+                "A combination of MEM_R | MEM_RW");
+    assign_enum(event_enum, "PATH", PyLong_FromLong((int)event::Event::PATH),
+                "A path constraint (conditional branch with symbolic/concolic condition) is encountered");
+    assign_enum(event_enum, "REG_R", PyLong_FromLong((int)event::Event::REG_R),
+                "A given register is read");
+    assign_enum(event_enum, "REG_W", PyLong_FromLong((int)event::Event::REG_W),
+                "A given register is written");
+    assign_enum(event_enum, "REG_RW", PyLong_FromLong((int)event::Event::REG_RW),
+                "A combination of REG_R | REG_W");
+    create_enum(module, "EVENT", event_enum, "Events on which a breakpoint can be triggered");
 
-    PyObject* event_class = create_class(PyUnicode_FromString("EVENT"), PyTuple_New(0), event_enum);
-    PyModule_AddObject(module, "EVENT", event_class);
-    
     // Action enum
-    PyObject* action_enum = PyDict_New();
-    PyDict_SetItemString(action_enum, "CONTINUE", PyLong_FromLong((int)event::Action::CONTINUE));
-    PyDict_SetItemString(action_enum, "HALT", PyLong_FromLong((int)event::Action::HALT));
-    PyDict_SetItemString(action_enum, "ERROR", PyLong_FromLong((int)event::Action::ERROR));
-
-    PyObject* action_class = create_class(PyUnicode_FromString("ACTION"), PyTuple_New(0), action_enum);
-    PyModule_AddObject(module, "ACTION", action_class);
+    PyObject* action_enum = new_enum();
+    assign_enum(action_enum, "CONTINUE", PyLong_FromLong((int)event::Action::CONTINUE),
+                "Contine execution");
+    assign_enum(action_enum, "HALT", PyLong_FromLong((int)event::Action::HALT),
+                "Stop execution");
+    assign_enum(action_enum, "ERROR", PyLong_FromLong((int)event::Action::ERROR),
+                "An error occurred in the callback");
+    create_enum(module, "ACTION", action_enum,
+                "Action returned by hook callbacks for the execution engine");
 
     // WHEN enum
-    PyObject* when_enum = PyDict_New();
-    PyDict_SetItemString(when_enum, "BEFORE", PyLong_FromLong((int)event::When::BEFORE));
-    PyDict_SetItemString(when_enum, "AFTER", PyLong_FromLong((int)event::When::AFTER));
-
-    PyObject* when_class = create_class(PyUnicode_FromString("WHEN"), PyTuple_New(0), when_enum);
-    PyModule_AddObject(module, "WHEN", when_class);
+    PyObject* when_enum = new_enum();
+    assign_enum(when_enum, "BEFORE", PyLong_FromLong((int)event::When::BEFORE),
+                "Trigger callbacks BEFORE the associated event");
+    assign_enum(when_enum, "AFTER", PyLong_FromLong((int)event::When::AFTER),
+                "Trigger callbacks AFTER the associated event");
+    create_enum(module, "WHEN", when_enum,
+                "An enum indicating when callbacks must be triggered");
 }
 
 } // namespace py

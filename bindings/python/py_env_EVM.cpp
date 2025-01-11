@@ -1115,58 +1115,66 @@ PyObject* maat_evm_set_gas_price(PyObject* mod, PyObject* args)
 void init_evm(PyObject* module)
 {
     /* TX_END enum */
-    PyObject* evm_enum = PyDict_New();
+    PyObject* evm_enum = new_enum();
     // Transaction result types
-    PyDict_SetItemString(evm_enum, "RETURN", PyLong_FromLong(
-        (int)env::EVM::TransactionResult::Type::RETURN)
+    assign_enum(evm_enum, "RETURN", PyLong_FromLong(
+        (int)env::EVM::TransactionResult::Type::RETURN),
+        "Transaction returned normally"
     );
-    PyDict_SetItemString(evm_enum, "REVERT", PyLong_FromLong(
-        (int)env::EVM::TransactionResult::Type::REVERT)
+    assign_enum(evm_enum, "REVERT", PyLong_FromLong(
+        (int)env::EVM::TransactionResult::Type::REVERT),
+        "Execution halted via REVERT"
     );
-    PyDict_SetItemString(evm_enum, "STOP", PyLong_FromLong(
-        (int)env::EVM::TransactionResult::Type::STOP)
+    assign_enum(evm_enum, "STOP", PyLong_FromLong(
+        (int)env::EVM::TransactionResult::Type::STOP),
+        "Execution halted via STOP opcode"
     );
-    PyDict_SetItemString(evm_enum, "INVALID", PyLong_FromLong(
-        (int)env::EVM::TransactionResult::Type::INVALID)
+    assign_enum(evm_enum, "INVALID", PyLong_FromLong(
+        (int)env::EVM::TransactionResult::Type::INVALID),
+        "Executed halted due to an invalid opcode"
     );
-    PyDict_SetItemString(evm_enum, "NONE", PyLong_FromLong(
-        (int)env::EVM::TransactionResult::Type::NONE)
+    assign_enum(evm_enum, "NONE", PyLong_FromLong(
+        (int)env::EVM::TransactionResult::Type::NONE),
+        "Used internally"
     );
-
-    PyObject* evm_class = create_class(PyUnicode_FromString("TX_RES"), PyTuple_New(0), evm_enum);
-    PyModule_AddObject(module, "TX_RES", evm_class);
-
+    create_enum(module, "TX_RES", evm_enum, "Transaction result enum");
 
     /* TX enum */
-    PyObject* tx_enum = PyDict_New();
+    PyObject* tx_enum = new_enum();
     // Transaction result types
-    PyDict_SetItemString(tx_enum, "CALL", PyLong_FromLong(
-        (int)env::EVM::Transaction::Type::CALL)
+    assign_enum(tx_enum, "CALL", PyLong_FromLong(
+        (int)env::EVM::Transaction::Type::CALL),
+        "Internal message with CALL"
     );
-    PyDict_SetItemString(tx_enum, "CALLCODE", PyLong_FromLong(
-        (int)env::EVM::Transaction::Type::CALLCODE)
+    assign_enum(tx_enum, "CALLCODE", PyLong_FromLong(
+        (int)env::EVM::Transaction::Type::CALLCODE),
+        "Internal message with CALLCODE"
     );
-    PyDict_SetItemString(tx_enum, "DELEGATECALL", PyLong_FromLong(
-        (int)env::EVM::Transaction::Type::DELEGATECALL)
+    assign_enum(tx_enum, "DELEGATECALL", PyLong_FromLong(
+        (int)env::EVM::Transaction::Type::DELEGATECALL),
+        "Internal message with DELEGATECALL"
     );
-    PyDict_SetItemString(tx_enum, "STATICCALL", PyLong_FromLong(
-        (int)env::EVM::Transaction::Type::STATICCALL)
+    assign_enum(tx_enum, "STATICCALL", PyLong_FromLong(
+        (int)env::EVM::Transaction::Type::STATICCALL),
+        "Internal message with STATICCALL"
     );
-    PyDict_SetItemString(tx_enum, "EOA", PyLong_FromLong(
-        (int)env::EVM::Transaction::Type::EOA)
+    assign_enum(tx_enum, "EOA", PyLong_FromLong(
+        (int)env::EVM::Transaction::Type::EOA),
+        "Transaction initiated by an EOA"
     );
-    PyDict_SetItemString(tx_enum, "NONE", PyLong_FromLong(
-        (int)env::EVM::Transaction::Type::NONE)
+    assign_enum(tx_enum, "NONE", PyLong_FromLong(
+        (int)env::EVM::Transaction::Type::NONE),
+        "Used internally"
     );
-    PyDict_SetItemString(tx_enum, "CREATE", PyLong_FromLong(
-        (int)env::EVM::Transaction::Type::CREATE)
+    assign_enum(tx_enum, "CREATE", PyLong_FromLong(
+        (int)env::EVM::Transaction::Type::CREATE),
+        "Create contract from another contract"
     );
-    PyDict_SetItemString(tx_enum, "CREATE2", PyLong_FromLong(
-        (int)env::EVM::Transaction::Type::CREATE2)
+    assign_enum(tx_enum, "CREATE2", PyLong_FromLong(
+        (int)env::EVM::Transaction::Type::CREATE2),
+        "Create contract from another contract (create2 deterministic address)"
     );
-
-    PyObject* tx_class = create_class(PyUnicode_FromString("TX"), PyTuple_New(0), tx_enum);
-    PyModule_AddObject(module, "TX", tx_class);
+    create_enum(module, "TX", tx_enum, "Transaction type enum");
 
     // Classes
     register_type(module, (PyTypeObject*)get_EVMContract_Type());

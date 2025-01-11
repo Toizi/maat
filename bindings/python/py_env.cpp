@@ -82,11 +82,10 @@ PyObject* PyEnv_FromEnvEmulator(maat::env::EnvEmulator* env, bool is_ref)
 void init_env(PyObject* module)
 {
     // OS enum
-    PyObject* os_enum = PyDict_New();
-    PyDict_SetItemString(os_enum, "LINUX", PyLong_FromLong((int)env::OS::LINUX));
-    PyDict_SetItemString(os_enum, "NONE", PyLong_FromLong((int)env::OS::NONE));
-    PyObject* os_class = create_class(PyUnicode_FromString("OS"), PyTuple_New(0), os_enum);
-    PyModule_AddObject(module, "OS", os_class);
+    PyObject* os_enum = new_enum();
+    assign_enum(os_enum, "LINUX", PyLong_FromLong((int)env::OS::LINUX), "Linux");
+    assign_enum(os_enum, "NONE", PyLong_FromLong((int)env::OS::NONE), "General");
+    create_enum(module, "OS", os_enum, "Operating system supported for emulation");
 };
 
 }

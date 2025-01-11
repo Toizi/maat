@@ -362,17 +362,16 @@ PyObject* PyMemEngine_FromMemEngine(MemEngine* mem, bool is_ref)
 
 void init_memory(PyObject* module)
 {
-    /* MEM enum */
-    PyObject* mem_enum = PyDict_New();
-    PyDict_SetItemString(mem_enum, "R", PyLong_FromLong(maat::mem_flag_r));
-    PyDict_SetItemString(mem_enum, "W", PyLong_FromLong(maat::mem_flag_w));
-    PyDict_SetItemString(mem_enum, "X", PyLong_FromLong(maat::mem_flag_x));
-    PyDict_SetItemString(mem_enum, "RW", PyLong_FromLong(maat::mem_flag_rw));
-    PyDict_SetItemString(mem_enum, "RX", PyLong_FromLong(maat::mem_flag_rx));
-    PyDict_SetItemString(mem_enum, "WX", PyLong_FromLong(maat::mem_flag_wx));
-    PyDict_SetItemString(mem_enum, "RWX", PyLong_FromLong(maat::mem_flag_rwx));
-    PyObject* perm_class = create_class(PyUnicode_FromString("PERM"), PyTuple_New(0), mem_enum);
-    PyModule_AddObject(module, "PERM", perm_class);
+    /* PERM enum */
+    PyObject* mem_enum = new_enum();
+    assign_enum(mem_enum, "R", PyLong_FromLong(maat::mem_flag_r), "");
+    assign_enum(mem_enum, "W", PyLong_FromLong(maat::mem_flag_w), "");
+    assign_enum(mem_enum, "X", PyLong_FromLong(maat::mem_flag_x), "");
+    assign_enum(mem_enum, "RW", PyLong_FromLong(maat::mem_flag_rw), "");
+    assign_enum(mem_enum, "RX", PyLong_FromLong(maat::mem_flag_rx), "");
+    assign_enum(mem_enum, "WX", PyLong_FromLong(maat::mem_flag_wx), "");
+    assign_enum(mem_enum, "RWX", PyLong_FromLong(maat::mem_flag_rwx), "");
+    create_enum(module, "PERM", mem_enum, "Memory access permissions");
 };
 
 } // namespace py

@@ -4,6 +4,25 @@ namespace maat{
 namespace py{
 
 // ============= MaatEngine ==================
+PyDoc_STRVAR(maat_MaatEngine_doc, R"EOF(MaatEngine(arch: ARCH, system: OS=OS.None)
+
+Create a new DSE engine
+)EOF");
+/* Constructor */
+int maat_MaatEngine_init(MaatEngine_Object* self, PyObject* args, PyObject *kwds)
+{
+    int arch;
+    int system = (int)env::OS::NONE;
+
+    // Parse arguments
+    if( ! PyArg_ParseTuple(args, "i|i", &arch, &system) ){
+        return NULL;
+    }
+
+    self->engine = new MaatEngine((Arch::Type)arch, (env::OS)system);
+    _init_MaatEngine_attributes(self);
+    return 0;
+}
 
 static void MaatEngine_dealloc(PyObject* self)
 {
@@ -49,7 +68,7 @@ static PyObject* MaatEngine_duplicate(PyObject* self, PyObject* args, PyObject* 
 static PyObject* MaatEngine_run(PyObject* self, PyObject* args){
     unsigned int max_instr = 0;
     info::Stop res;
-    
+
     if( ! PyArg_ParseTuple(args, "|I", &max_instr) ){
         return NULL;
     }
@@ -390,7 +409,7 @@ PyTypeObject MaatEngine_Type = {
     0,                                        /* tp_setattro */
     0,                                        /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT,                       /* tp_flags */
-    "Dynamic Symbolic Execution Engine",      /* tp_doc */
+    maat_MaatEngine_doc,           /* tp_doc */
     0,                                        /* tp_traverse */
     0,                                        /* tp_clear */
     0,                                        /* tp_richcompare */
@@ -405,9 +424,9 @@ PyTypeObject MaatEngine_Type = {
     0,                                        /* tp_descr_get */
     0,                                        /* tp_descr_set */
     0,                                        /* tp_dictoffset */
-    0,                                        /* tp_init */
+    (initproc)maat_MaatEngine_init,           /* tp_init */
     0,                                        /* tp_alloc */
-    0,                                        /* tp_new */
+    PyType_GenericNew,                        /* tp_new */
 };
 
 PyObject* get_MaatEngine_Type(){
@@ -433,7 +452,7 @@ void _clear_MaatEngine_attributes(MaatEngine_Object* obj)
 }
 
 void _init_MaatEngine_attributes(MaatEngine_Object* object)
-{   
+{
     // Then set attributes
     object->engine->self_python_wrapper_object = (PyObject*)object;
     // Create wrappers with references to members
@@ -453,24 +472,6 @@ void _init_MaatEngine_attributes(MaatEngine_Object* object)
     object->process = PyProcessInfo_FromProcessInfo(object->engine->process.get(), true);
     // TODO: object->log ....
 }
-
-/* Constructor */
-PyObject* maat_MaatEngine(PyObject* self, PyObject* args){
-    MaatEngine_Object* object;
-    int arch;
-    int system = (int)env::OS::NONE;
-
-    // Parse arguments
-    if( ! PyArg_ParseTuple(args, "i|i", &arch, &system) ){
-        return NULL;
-    }
-
-    // Create object
-    return PyMaatEngine_FromMaatEngine(
-        new MaatEngine((Arch::Type)arch, (env::OS)system)
-    );
-}
-
 
 PyObject* PyMaatEngine_FromMaatEngine(MaatEngine* engine)
 {
@@ -499,25 +500,38 @@ PyObject* PyMaatEngine_FromMaatEngine(MaatEngine* engine)
 void init_engine(PyObject* module)
 {
     /* STOP enum */
-    PyObject* stop_enum = PyDict_New();
-    PyDict_SetItemString(stop_enum, "HOOK", PyLong_FromLong((int)info::Stop::HOOK));
-    PyDict_SetItemString(stop_enum, "SYMBOLIC_PC", PyLong_FromLong((int)info::Stop::SYMBOLIC_PC));
-    PyDict_SetItemString(stop_enum, "SYMBOLIC_CODE", PyLong_FromLong((int)info::Stop::SYMBOLIC_CODE));
-    PyDict_SetItemString(stop_enum, "MISSING_FUNCTION", PyLong_FromLong((int)info::Stop::MISSING_FUNCTION));
-    PyDict_SetItemString(stop_enum, "MISSING_SYSCALL", PyLong_FromLong((int)info::Stop::MISSING_SYSCALL));
-    PyDict_SetItemString(stop_enum, "EXIT", PyLong_FromLong((int)info::Stop::EXIT));
-    PyDict_SetItemString(stop_enum, "INST_COUNT", PyLong_FromLong((int)info::Stop::INST_COUNT));
-    PyDict_SetItemString(stop_enum, "ILLEGAL_INST", PyLong_FromLong((int)info::Stop::ILLEGAL_INST));
-    PyDict_SetItemString(stop_enum, "UNSUPPORTED_INST", PyLong_FromLong((int)info::Stop::UNSUPPORTED_INST));
-    PyDict_SetItemString(stop_enum, "ARITHMETIC_ERROR", PyLong_FromLong((int)info::Stop::ARITHMETIC_ERROR));
-    PyDict_SetItemString(stop_enum, "ERROR", PyLong_FromLong((int)info::Stop::ERROR));
-    PyDict_SetItemString(stop_enum, "FATAL", PyLong_FromLong((int)info::Stop::FATAL));
-    PyDict_SetItemString(stop_enum, "NONE", PyLong_FromLong((int)info::Stop::NONE));
-    PyObject* stop_class = create_class(PyUnicode_FromString("STOP"), PyTuple_New(0), stop_enum);
-    PyModule_AddObject(module, "STOP", stop_class);
+    PyObject* stop_enum = new_enum();
+    assign_enum(stop_enum, "HOOK", PyLong_FromLong((int)info::Stop::HOOK),
+                "An event hook halted execution");
+    assign_enum(stop_enum, "SYMBOLIC_PC", PyLong_FromLong((int)info::Stop::SYMBOLIC_PC),
+                "The program counter is purely symbolic");
+    assign_enum(stop_enum, "SYMBOLIC_CODE", PyLong_FromLong((int)info::Stop::SYMBOLIC_CODE),
+                "The code to execute is made of purely symbolic data");
+    assign_enum(stop_enum, "MISSING_FUNCTION", PyLong_FromLong((int)info::Stop::MISSING_FUNCTION),
+                "Calling a function that is neither loaded nor emulated");
+    assign_enum(stop_enum, "MISSING_SYSCALL", PyLong_FromLong((int)info::Stop::MISSING_SYSCALL),
+                "Performing a syscall that is not emulated");
+    assign_enum(stop_enum, "EXIT", PyLong_FromLong((int)info::Stop::EXIT),
+                "Emulated program exited");
+    assign_enum(stop_enum, "INST_COUNT", PyLong_FromLong((int)info::Stop::INST_COUNT),
+                "The maximum number of instructions to execute has been reached. See MaatEngine.run()");
+    assign_enum(stop_enum, "ILLEGAL_INST", PyLong_FromLong((int)info::Stop::ILLEGAL_INST),
+                "The disassembler encountered an illegal instruction");
+    assign_enum(stop_enum, "UNSUPPORTED_INST", PyLong_FromLong((int)info::Stop::UNSUPPORTED_INST),
+                "The disassembler encountered an instruction that it can not lift");
+    assign_enum(stop_enum, "ARITHMETIC_ERROR", PyLong_FromLong((int)info::Stop::ARITHMETIC_ERROR),
+                "Fatal arithmetic errors in the emulated code (like div by zero)");
+    assign_enum(stop_enum, "ERROR", PyLong_FromLong((int)info::Stop::ERROR),
+                "An error was encountered in the emulated code");
+    assign_enum(stop_enum, "FATAL", PyLong_FromLong((int)info::Stop::FATAL),
+                "A fatal error occured internally in Maat (not the emulated process)");
+    assign_enum(stop_enum, "NONE", PyLong_FromLong((int)info::Stop::NONE),
+                "Used internally");
+    create_enum(module, "STOP", stop_enum, "Reason why the engine stopped running code");
 
     register_type(module, (PyTypeObject*)get_Info_Type());
+    register_type(module, (PyTypeObject*)get_MaatEngine_Type());
 };
-    
+
 } // namespace py
 } // namespace maat

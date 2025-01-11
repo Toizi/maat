@@ -17,6 +17,13 @@ namespace py
 {
 
 // Util function
+int set_doc(PyObject* obj, const char* docstr);
+// enums will get an attribute '_enum_docs', which is a dictionary that maps enum names
+// to their docstr when added via assign_enum since we cannot propagate docstrings if
+// the values are python ints
+PyObject* new_enum();
+int assign_enum(PyObject* enum_dict, const char* name, PyObject* value, const char* docstr);
+int create_enum(PyObject* module, const char* name, PyObject* enum_dict, const char* docstr);
 PyObject* create_class(PyObject* name, PyObject* bases, PyObject* dict);
 std::optional<std::filesystem::path> get_maat_module_directory();
 
@@ -107,7 +114,7 @@ typedef struct{
     PyObject* process;
 } MaatEngine_Object;
 PyObject* get_MaatEngine_Type();
-PyObject* maat_MaatEngine(PyObject* self, PyObject* args);
+int maat_MaatEngine_init(MaatEngine_Object* self, PyObject* args, PyObject* kwds);
 PyObject* PyMaatEngine_FromMaatEngine(MaatEngine*);
 // This method initializes all the attributes of a python MaatEngine object. It
 // is separate from the constructor because we also need to call it when deserializing
