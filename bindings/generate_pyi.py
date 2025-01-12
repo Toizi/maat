@@ -56,6 +56,14 @@ def method_def(obj, function_name, fail_on_sig_err) -> str:
     s += "        ...\n\n"
     return s
 
+def member_def(obj, fail_on_sig_err) -> str:
+    s = ''
+    member_name = obj.__name__
+
+    s += f'    {member_name}: Any\n'
+
+    return s
+
 def import_module(module_path):
     # if a custom module path is provided, add the directory of the file to the first entry in our sys.path
     if module_path:
@@ -67,7 +75,9 @@ def import_module(module_path):
     return maat
 
 def generate_pyi(module , fail_on_sig_err: bool) -> str:
-    s = 'from enum import IntEnum'
+    s = ''
+    s += 'from enum import IntEnum\n'
+    s += 'from typing import Any\n'
 
     for name, obj in inspect.getmembers(module):
         print(name)
@@ -92,7 +102,10 @@ def generate_pyi(module , fail_on_sig_err: bool) -> str:
                         if member.__doc__:
                             s += f"    '''{obj._enum_docs[member_name]}'''\n"
                     else:
-                        s += method_def(member, member_name, fail_on_sig_err)
+                        if callable(member):
+                            s += method_def(member, member_name, fail_on_sig_err)
+                        else:
+                            s += member_def(member, fail_on_sig_err)
     return s
 
 def main():

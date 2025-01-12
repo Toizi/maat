@@ -33,7 +33,7 @@ static void MaatEngine_dealloc(PyObject* self)
 
 PyDoc_STRVAR(
     MaatEngine_duplicate_doc,
-    "_duplicate(duplicate: set[str]={}, share: set[str]={}) -> MaatEngine\n"
+    "_duplicate(duplicate: set[str]=set(), share: set[str]=set()) -> MaatEngine\n"
     "\n"
     "Duplicate a symbolic engine."
 );
