@@ -3,6 +3,7 @@ import inspect
 import argparse
 from pathlib import Path
 import sys
+import types
 
 class SignatureError(Exception):
     pass
@@ -31,20 +32,25 @@ def get_signature(func) -> str:
 
 def method_def(obj, function_name, fail_on_sig_err) -> str:
     s = ''
+    # check if we have a method or a static function
+    is_method = isinstance(obj, types.MethodDescriptorType) or function_name == '__init__'
+    self_str = 'self, ' if is_method else ''
     try:
         sig = get_signature(obj)
         print(sig)
         # replace function name in case we have a different one.
         # this is mainly relevant for __init__ since the docstring sits on the class
         # and needs to be transferred to __init__
-        sig = function_name + '(self, ' + sig[sig.index('(') + 1:]
+        sig = function_name + f'({self_str}' + sig[sig.index('(') + 1:]
     except SignatureError as err:
         if fail_on_sig_err:
             raise
         else:
             print(f"warning: {err}")
-            sig = f'{function_name}(self, *args, **kwargs)'
+            sig = f'{function_name}({self_str}*args, **kwargs)'
 
+    if not is_method:
+        s += '    @staticmethod\n'
     s += f'    def {sig}:\n'
     s += f"        '''{obj.__doc__}'''\n"
     s += "        ...\n\n"

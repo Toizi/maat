@@ -2,12 +2,13 @@
 
 namespace maat{
 namespace py{
-    
-static void Config_dealloc(PyObject* self){
-    Py_TYPE(self)->tp_free((PyObject *)self);
-};
 
-
+PyDoc_STRVAR(
+    Config_add_explicit_sleigh_dir_doc,
+    "add_explicit_sleigh_dir(path: str)\n"
+    "\n"
+    "Add an explicit directory where to look for sleigh specification files"
+);
 static PyObject* Config_add_explicit_sleigh_dir(PyObject* self, PyObject* args)
 {
     const char* dir = nullptr;
@@ -19,6 +20,12 @@ static PyObject* Config_add_explicit_sleigh_dir(PyObject* self, PyObject* args)
     Py_RETURN_NONE;
 }
 
+PyDoc_STRVAR(
+    Config_add_explicit_sleigh_file_doc,
+    "add_explicit_sleigh_file(path: str)\n"
+    "\n"
+    "Add an explicit path to a sleigh specification file"
+);
 static PyObject* Config_add_explicit_sleigh_file(PyObject* self, PyObject* args)
 {
     const char* filepath = nullptr;
@@ -31,8 +38,8 @@ static PyObject* Config_add_explicit_sleigh_file(PyObject* self, PyObject* args)
 }
 
 static PyMethodDef Config_methods[] = {
-    {"add_explicit_sleigh_file", (PyCFunction)Config_add_explicit_sleigh_file, METH_VARARGS | METH_CLASS, "Add an explicit path to a sleigh specification file"},
-    {"add_explicit_sleigh_dir", (PyCFunction)Config_add_explicit_sleigh_dir, METH_VARARGS | METH_CLASS, "Add an explicit directory where to look for sleigh specification files"},
+    {"add_explicit_sleigh_file", (PyCFunction)Config_add_explicit_sleigh_file, METH_VARARGS | METH_STATIC, Config_add_explicit_sleigh_file_doc},
+    {"add_explicit_sleigh_dir", (PyCFunction)Config_add_explicit_sleigh_dir, METH_VARARGS | METH_STATIC, Config_add_explicit_sleigh_dir_doc},
     {NULL, NULL, 0, NULL}
 };
 
@@ -40,35 +47,35 @@ static PyMethodDef Config_methods[] = {
 /* Type description for python Expr objects */
 PyTypeObject Config_Type = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    "MaatConfig",                                   /* tp_name */
-    sizeof(Config_Object),                      /* tp_basicsize */
+    "MaatConfig",                             /* tp_name */
+    sizeof(Config_Object),                    /* tp_basicsize */
     0,                                        /* tp_itemsize */
-    (destructor)Config_dealloc,            /* tp_dealloc */
-    0,               /* tp_print */
+    0,                                        /* tp_dealloc */
+    0,                                        /* tp_print */
     0,                                        /* tp_getattr */
     0,                                        /* tp_setattr */
     0,                                        /* tp_reserved */
-    0,                           /* tp_repr */
+    0,                                        /* tp_repr */
     0,                                        /* tp_as_number */
     0,                                        /* tp_as_sequence */
     0,                                        /* tp_as_mapping */
     0,                                        /* tp_hash  */
     0,                                        /* tp_call */
-    0,                            /* tp_str */
+    0,                                        /* tp_str */
     0,                                        /* tp_getattro */
     0,                                        /* tp_setattro */
     0,                                        /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT,                       /* tp_flags */
-    "Maat global configuration",             /* tp_doc */
+    "Maat global configuration",              /* tp_doc */
     0,                                        /* tp_traverse */
     0,                                        /* tp_clear */
     0,                                        /* tp_richcompare */
     0,                                        /* tp_weaklistoffset */
     0,                                        /* tp_iter */
     0,                                        /* tp_iternext */
-    Config_methods,                                        /* tp_methods */
+    Config_methods,                           /* tp_methods */
     0,                                        /* tp_members */
-    0,                              /* tp_getset */
+    0,                                        /* tp_getset */
     0,                                        /* tp_base */
     0,                                        /* tp_dict */
     0,                                        /* tp_descr_get */
