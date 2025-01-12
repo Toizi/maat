@@ -246,6 +246,11 @@ PyObject* PySettings_FromSettings(Settings* _settings, bool is_ref){
     return (PyObject*)object;
 }
 
-    
+
+void init_settings(PyObject* module)
+{
+    register_type(module, &Settings_Type);
+}
+
 } // namespace py
 } // namespace maat

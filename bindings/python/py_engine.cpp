@@ -425,16 +425,16 @@ static PyMethodDef MaatEngine_methods[] = {
 };
 
 static PyMemberDef MaatEngine_members[] = {
-    {"vars", T_OBJECT_EX, offsetof(MaatEngine_Object, vars), READONLY, "Symbolic Variables Context"},
-    {"cpu", T_OBJECT_EX, offsetof(MaatEngine_Object, cpu), READONLY, "Emulated CPU"},
-    {"mem", T_OBJECT_EX, offsetof(MaatEngine_Object, mem), READONLY, "Memory Engine"},
-    {"hooks", T_OBJECT_EX, offsetof(MaatEngine_Object, hooks), READONLY, "Event Hooks Manager"},
-    {"info", T_OBJECT_EX, offsetof(MaatEngine_Object, info), READONLY, "Symbolic Engine Info"},
-    {"path", T_OBJECT_EX, offsetof(MaatEngine_Object, path), READONLY, "Path Manager"},
-    {"env", T_OBJECT_EX, offsetof(MaatEngine_Object, env), READONLY, "Environment Manager"},
+    {"vars", T_OBJECT_EX, offsetof(MaatEngine_Object, vars), READONLY, "type=VarContext\nSymbolic Variables Context"},
+    {"cpu", T_OBJECT_EX, offsetof(MaatEngine_Object, cpu), READONLY, "type=CPU\nEmulated CPU"},
+    {"mem", T_OBJECT_EX, offsetof(MaatEngine_Object, mem), READONLY, "type=MemEngine\nMemory Engine"},
+    {"hooks", T_OBJECT_EX, offsetof(MaatEngine_Object, hooks), READONLY, "type=EventManager\nEvent Hooks Manager"},
+    {"info", T_OBJECT_EX, offsetof(MaatEngine_Object, info), READONLY, "type=Info\nSymbolic Engine Info"},
+    {"path", T_OBJECT_EX, offsetof(MaatEngine_Object, path), READONLY, "type=PathManager\nPath Manager"},
+    {"env", T_OBJECT_EX, offsetof(MaatEngine_Object, env), READONLY, "type=EnvEmulator\nEnvironment Manager"},
     //{"stats", T_OBJECT_EX, offsetof(MaatEngine_Object, stats), READONLY, "Runtime statistics"},
-    {"settings", T_OBJECT_EX, offsetof(MaatEngine_Object, settings), READONLY, "Symbolic Engine Settings"},
-    {"process", T_OBJECT_EX, offsetof(MaatEngine_Object, process), READONLY, "Process Info"},
+    {"settings", T_OBJECT_EX, offsetof(MaatEngine_Object, settings), READONLY, "type=Settings\nSymbolic Engine Settings"},
+    {"process", T_OBJECT_EX, offsetof(MaatEngine_Object, process), READONLY, "type=ProcessInfo\nProcess Info"},
     {NULL}
 };
 

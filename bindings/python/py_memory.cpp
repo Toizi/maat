@@ -249,7 +249,7 @@ PyObject* MemEngine_make_concolic(PyObject* self, PyObject* args){
     unsigned int nb_elems, elem_size;
     char * name = "";
     std::string res_name;
-    
+
     if( ! PyArg_ParseTuple(args, "KIIs", &addr, &nb_elems, &elem_size, &name)){
         return NULL;
     }
@@ -349,7 +349,7 @@ static PyTypeObject MemEngine_Type = {
 PyObject* PyMemEngine_FromMemEngine(MemEngine* mem, bool is_ref)
 {
     MemEngine_Object* object;
-    
+
     // Create object
     PyType_Ready(&MemEngine_Type);
     object = PyObject_New(MemEngine_Object, &MemEngine_Type);
@@ -372,6 +372,8 @@ void init_memory(PyObject* module)
     assign_enum(mem_enum, "WX", PyLong_FromLong(maat::mem_flag_wx), "");
     assign_enum(mem_enum, "RWX", PyLong_FromLong(maat::mem_flag_rwx), "");
     create_enum(module, "PERM", mem_enum, "Memory access permissions");
+
+    register_type(module, &MemEngine_Type);
 };
 
 } // namespace py

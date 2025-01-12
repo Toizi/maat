@@ -79,6 +79,10 @@ PyObject* PyProcessInfo_FromProcessInfo(ProcessInfo* pinfo, bool is_ref)
     return (PyObject*)object;
 }
 
-    
+void init_process(PyObject* module)
+{
+    register_type(module, &ProcessInfo_Type);
+}
+
 } // namespace py
 } // namespace maat

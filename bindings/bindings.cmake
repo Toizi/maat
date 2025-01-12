@@ -35,6 +35,7 @@ add_library(maat_python MODULE
   bindings/python/py_memory.cpp
   bindings/python/py_path.cpp
   bindings/python/py_process.cpp
+  bindings/python/py_regs.cpp
   bindings/python/py_serialization.cpp
   bindings/python/py_settings.cpp
   bindings/python/py_solver.cpp

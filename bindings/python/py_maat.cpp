@@ -80,14 +80,19 @@ PyMODINIT_FUNC PyInit_maat()
     init_arch(module);
     init_expression(module);
     init_constraint(module);
+    init_cpu(module);
+    init_regs(module);
     init_memory(module);
     init_engine(module);
     init_event(module);
+    init_path(module);
     init_loader(module);
     init_env(module);
     init_config(module);
     init_stats(module);
     init_evm(module);
+    init_settings(module);
+    init_process(module);
 
     PyState_AddModule(module, &maat_module_def);
 

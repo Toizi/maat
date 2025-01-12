@@ -60,7 +60,24 @@ def member_def(obj, fail_on_sig_err) -> str:
     s = ''
     member_name = obj.__name__
 
-    s += f'    {member_name}: Any\n'
+    type_str = None
+    # check if docs start with magic string that denotes type of member
+    type_start = 'type='
+    if obj.__doc__:
+        docstr = obj.__doc__
+        line = docstr.splitlines()[0]
+        if line.startswith(type_start):
+            type_str = line[len(type_start):]
+    if type_str is None:
+        err = f"Could not find type declaration via '{type_start}' in member def {member_name}"
+        if fail_on_sig_err:
+            raise SignatureError(err)
+        else:
+            print(f"warning: {err}")
+        type_str = 'Any'
+
+    s += f'    {member_name}: {type_str}\n'
+    s += f"    '''{obj.__doc__}'''\n"
 
     return s
 

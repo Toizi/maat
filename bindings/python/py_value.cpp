@@ -1036,6 +1036,7 @@ void init_expression(PyObject* module)
     Value_operators.nb_invert = Value_nb_not;
 
     register_type(module, (PyTypeObject*)get_Value_Type());
+    register_type(module, (PyTypeObject*)get_VarContext_Type());
 }
 
 } // namespace py

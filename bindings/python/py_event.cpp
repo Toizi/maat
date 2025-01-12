@@ -307,6 +307,8 @@ void init_event(PyObject* module)
                 "Trigger callbacks AFTER the associated event");
     create_enum(module, "WHEN", when_enum,
                 "An enum indicating when callbacks must be triggered");
+
+    register_type(module, &EventManager_Type);
 }
 
 } // namespace py

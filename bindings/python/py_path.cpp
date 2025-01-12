@@ -236,5 +236,12 @@ PyObject* PyPathIterator_FromWrapper(const PathManager::IteratorWrapper& wrapper
     return (PyObject*)object;
 }
 
+
+// Init enums
+void init_path(PyObject* module)
+{
+    register_type(module, &Path_Type);
+}
+
 } // namespace py
 } // namespace maat

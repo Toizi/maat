@@ -162,13 +162,27 @@ PyObject* PyInfo_FromInfoAndArch(info::Info* info, bool is_ref, Arch* arch);
 PyObject* get_Info_Type();
 #define as_info_object(x)  (*((Info_Object*)x))
 
+// ====================== Regs ========================
+void init_regs(PyObject* module);
+typedef struct {
+    PyObject_HEAD
+    PyObject *cpu;
+} Regs_Object;
+PyObject* PyRegs_FromCPU(PyObject* cpu);
+PyObject* get_Regs_Type();
+#define as_regs_object(x) (*((Regs_Object*)x))
+
+// ====================== CPU ========================
+void init_cpu(PyObject* module);
 typedef struct {
     PyObject_HEAD
     ir::CPU* cpu;
     bool is_ref;
     Arch* arch; // Always ref, needed to get registers by name
     std::shared_ptr<VarContext>* varctx; // Always ref, needed to build expressions
+    PyObject *regs;
 } CPU_Object;
+PyObject* get_CPU_Type();
 
 PyObject* PyCPU_FromCPUAndArchAndVarContext(
     ir::CPU* cpu,
@@ -182,6 +196,7 @@ PyObject* PyCPU_FromCPUAndArchAndVarContext(
 void init_loader(PyObject* module);
 
 // ====================== Settings ======================
+void init_settings(PyObject* module);
 typedef struct{
     PyObject_HEAD
     Settings* settings;
@@ -191,6 +206,7 @@ PyObject* PySettings_FromSettings(Settings* settings, bool is_ref);
 #define as_settings_object(x)  (*((Settings_Object*)x))
 
 // ====================== PathManager ======================
+void init_path(PyObject* module);
 typedef struct{
     PyObject_HEAD
     PathManager* path;
@@ -208,6 +224,8 @@ typedef struct {
 PyObject* PyPathIterator_FromWrapper(const PathManager::IteratorWrapper& wrapper);
 #define as_pathiterator_object(x) (*((PathIterator_Object*)x))
 
+// ====================== ProcessInfo ======================
+void init_process(PyObject* module);
 typedef struct{
     PyObject_HEAD
     maat::ProcessInfo* process;
