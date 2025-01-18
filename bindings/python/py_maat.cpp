@@ -21,10 +21,6 @@ PyMethodDef module_methods[] = {
     {"ULT", (PyCFunction)maat_ULT, METH_VARARGS, "Unsigned less-than constraint on abstract values"},
     {"Zext", (PyCFunction)maat_Zext, METH_VARARGS, "Zero-extend an abstract value"},
     {"ITE", (PyCFunction)maat_ITE, METH_VARARGS, "Create an If-Then-Else expression from a Constraint and two abstract expressions"},
-    // Solver
-    {"Solver", (PyCFunction)maat_Solver, METH_NOARGS, "Create a constraint solver"},
-    // SimpleStateManager
-    {"SimpleStateManager", (PyCFunction)maat_SimpleStateManager, METH_VARARGS, "Create a new helper for serializing/deserializing engine states"},
     // EVM
     {"EVMTransaction", (PyCFunction)maat_Transaction, METH_VARARGS, "Create an ethereum transaction"},
     {"contract", (PyCFunction)maat_contract, METH_VARARGS, "Get EVM contract associated with a MaatEngine"},
@@ -93,6 +89,8 @@ PyMODINIT_FUNC PyInit_maat()
     init_evm(module);
     init_settings(module);
     init_process(module);
+    init_solver(module);
+    init_simplestate(module);
 
     PyState_AddModule(module, &maat_module_def);
 

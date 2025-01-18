@@ -7,6 +7,16 @@ namespace maat
 namespace py
 {
 
+PyDoc_STRVAR(maat_Solver_doc, R"EOF(Solver()
+
+Create a new constraint solver
+)EOF");
+/* Constructor */
+PyObject* maat_Solver_init(Solver_Object* self, PyObject* args, PyObject* kwds)
+{
+    self->solver = solver::_new_solver_raw();
+    return 0;
+}
 
 static void Solver_dealloc(PyObject* self)
 {
@@ -25,11 +35,11 @@ static PyObject* Solver_reset(PyObject* self)
 static PyObject* Solver_add(PyObject* self, PyObject* args)
 {
     PyObject* constr;
-    
+
     if( !PyArg_ParseTuple(args, "O!", get_Constraint_Type(), &constr)){
         return NULL;
     }
-    
+
     as_solver_object(self).solver->add(*(as_constraint_object(constr).constr));
     Py_RETURN_NONE;
 };
@@ -90,7 +100,7 @@ static PyObject* Solver_get_did_time_out(PyObject* self, void* closure)
     return PyBool_FromLong(as_solver_object(self).solver->did_time_out());
 }
 
-static PyGetSetDef Solver_getset[] = 
+static PyGetSetDef Solver_getset[] =
 {
     {"timeout", Solver_get_timeout, Solver_set_timeout, "Maximum time to spend to solve a constraint (in milliseconds)", NULL},
     {"did_time_out", Solver_get_did_time_out, NULL, "True if the last call to check() timed out", NULL},
@@ -100,11 +110,11 @@ static PyGetSetDef Solver_getset[] =
 /* Type description for python Solver objects */
 static PyTypeObject Solver_Type = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    "Solver",                             /* tp_name */
-    sizeof(Solver_Object),                /* tp_basicsize */
+    "Solver",                                 /* tp_name */
+    sizeof(Solver_Object),                    /* tp_basicsize */
     0,                                        /* tp_itemsize */
-    (destructor)Solver_dealloc,           /* tp_dealloc */
-    0,                                       /* tp_print */
+    (destructor)Solver_dealloc,               /* tp_dealloc */
+    0,                                        /* tp_print */
     0,                                        /* tp_getattr */
     0,                                        /* tp_setattr */
     0,                                        /* tp_reserved */
@@ -119,7 +129,7 @@ static PyTypeObject Solver_Type = {
     0,                                        /* tp_setattro */
     0,                                        /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT,                       /* tp_flags */
-    "Constraint solver",                          /* tp_doc */
+    maat_Solver_doc,                          /* tp_doc */
     0,                                        /* tp_traverse */
     0,                                        /* tp_clear */
     0,                                        /* tp_richcompare */
@@ -134,34 +144,21 @@ static PyTypeObject Solver_Type = {
     0,                                        /* tp_descr_get */
     0,                                        /* tp_descr_set */
     0,                                        /* tp_dictoffset */
-    0,                                        /* tp_init */
+    (initproc)maat_Solver_init,               /* tp_init */
     0,                                        /* tp_alloc */
-    0,                                        /* tp_new */
+    PyType_GenericNew,                        /* tp_new */
 };
 
 PyObject* get_Solver_Type(){
     return (PyObject*)&Solver_Type;
 }
 
-/* Constructors */
-PyObject* PySolver_FromSolver(solver::Solver* s)
+/* ------------------------------------
+ *          Init function
+ * ------------------------------------ */
+void init_solver(PyObject* module)
 {
-    Solver_Object* object;
-    
-    // Create object
-    PyType_Ready(&Solver_Type);
-    object = PyObject_New(Solver_Object, &Solver_Type);
-    if( object != nullptr )
-    {
-        object->solver = s;
-    }
-    return (PyObject*)object;
-}
-
-PyObject* maat_Solver(PyObject* module)
-{
-    solver::Solver* res = solver::_new_solver_raw();
-    return PySolver_FromSolver(res);
+    register_type(module, (PyTypeObject*)get_Solver_Type());
 }
 
 } // namespace py

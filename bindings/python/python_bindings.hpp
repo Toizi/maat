@@ -276,13 +276,13 @@ PyObject* PyEnv_FromEnvEmulator(env::EnvEmulator* env, bool is_ref);
 #define as_env_object(x)  (*((Env_Object*)x))
 
 // ================= Solver ===================
+void init_solver(PyObject* module);
 #ifdef MAAT_HAS_SOLVER_BACKEND
 typedef struct{
     PyObject_HEAD
     maat::solver::Solver* solver;
 } Solver_Object;
 PyObject* get_Solver_Type();
-PyObject* maat_Solver(PyObject* module);
 #define as_solver_object(x)  (*((Solver_Object*)x))
 #endif
 
@@ -306,14 +306,14 @@ PyObject* maat_Stats();
 #define as_stats_object(x)  (*((Stats_Object*)x))
 
 // ============ SimpleStateManager ============
-
+void init_simplestate(PyObject* module);
 typedef struct{
     PyObject_HEAD
     maat::serial::SimpleStateManager* s;
 } SimpleStateManager_Object;
 PyObject* get_SimpleStateManager_Type();
 PyObject* maat_SimpleStateManager(PyObject* self, PyObject* args);
-#define as_simple_serializer_object(x)  (*((SimpleStateManager_Object*)x))
+#define as_simplestate_object(x)  (*((SimpleStateManager_Object*)x))
 
 // ============== EVM ======================
 void init_evm(PyObject* module);
