@@ -49,9 +49,9 @@ def test_crackme_vm():
         _input = b"aaaaaaaaaaaapcod3s_aaaaaaaa"
         m.mem.write(0x8049a98, _input)
         m.mem.make_concolic(0x8049a98, len(_input), 1, "input")
-        m.cpu.eax = len(_input)
-        m.info.addr = m.mem.read(m.cpu.esp, 4).as_uint()
-        m.cpu.esp += 4
+        m.cpu.regs.eax = len(_input)
+        m.info.addr = m.mem.read(m.cpu.regs.esp, 4).as_uint()
+        m.cpu.regs.esp += 4
 
     m.hooks.add(EVENT.EXEC, WHEN.BEFORE, name="scanf", filter=0x8048a6c, callbacks=[scanf])
 
@@ -111,9 +111,9 @@ def test_crackme_vm_serialization():
         _input = b"aaaaaaaaaaaapcod3s_aaaaaaaa"
         m.mem.write(0x8049a98, _input)
         m.mem.make_concolic(0x8049a98, len(_input), 1, "input")
-        m.cpu.eax = len(_input)
-        m.info.addr = m.mem.read(m.cpu.esp, 4).as_uint()
-        m.cpu.esp += 4
+        m.cpu.regs.eax = len(_input)
+        m.info.addr = m.mem.read(m.cpu.regs.esp, 4).as_uint()
+        m.cpu.regs.esp += 4
 
     # Initialize engine
     m = MaatEngine(ARCH.X86, OS.LINUX)
