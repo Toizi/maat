@@ -108,10 +108,21 @@ def import_module(module_path):
     import maat
     return maat
 
+hardcoded_value_defs = ''
+for op in ('eq', 'ne', 'lt', 'le', 'gt', 'ge', 'xor', 'add', 'sub', 'mul', 'and', 'or', 'floordiv', 'truediv', 'mod', 'lshift', 'rshift'):
+    hardcoded_value_defs += f'    def __{op}__(self, other) -> Constraint:\n'
+    hardcoded_value_defs += "        ...\n\n"
+
+for op in ('invert', 'neg'):
+    hardcoded_value_defs += f'    def __{op}__(self) -> Constraint:\n'
+    hardcoded_value_defs += "        ...\n\n"
+
 def generate_pyi(module , fail_on_sig_err: bool) -> str:
     s = ''
     s += 'from enum import IntEnum\n'
     s += 'from typing import Any, Callable, Iterator, Optional\n'
+    s += '# ignore eq/ne not returning bool error'
+    s += '# pyright: reportIncompatibleMethodOverride=false'
 
     for name, obj in inspect.getmembers(module):
         if name.startswith('__'):
@@ -130,6 +141,9 @@ def generate_pyi(module , fail_on_sig_err: bool) -> str:
             # if it has the default __init__, it probably cannot be called
             if hasattr(obj, '__init__') and obj.__init__ != object.__init__:
                 s += method_def(obj, obj, '__init__', fail_on_sig_err)
+
+            if name == 'Value':
+                s += hardcoded_value_defs
 
             for member_name, member in inspect.getmembers(obj):
                 if not member_name.startswith('__') and member_name != '_enum_docs':
