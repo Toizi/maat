@@ -167,7 +167,6 @@ def main():
     module = import_module(args.module_path)
     pyi_str = generate_pyi(module, args.fail_on_missing_sig)
     try:
-        # ast.parse(pyi_str, 'maat.pyi', mode='func_type', type_comments=True)
         compile(pyi_str, 'maat.pyi', mode='exec', flags=ast.PyCF_ONLY_AST|ast.PyCF_TYPE_COMMENTS)
     except:
         print("error: could not compile() the generated type stubs")
