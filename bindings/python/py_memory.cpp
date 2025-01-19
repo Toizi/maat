@@ -28,6 +28,17 @@ static PyObject* MemEngine_repr(PyObject* self) {
     return MemEngine_str(self);
 }
 
+PyDoc_STRVAR(
+    MemEngine_map_doc,
+    "map(start: int, end: int, flags: PERM=PERM.RWX, name: str='')\n"
+    "\n"
+    "Map a memory region. The requested region to map is force-aligned to the memory defaut page size (0x1000)."
+    "For instance map(0xfff, 0x1001, ...) will actually map addresses from 0x0 up to 0x1fff.\n"
+    ":param int start: Start address of the map (included)\n"
+    ":param int end: End address of the map (included)\n"
+    ":param PERM flags: (Optional) Memory permissions of the map\n"
+    ":param str name: (Optional) Name of the map\n"
+);
 static PyObject* MemEngine_map(PyObject* self, PyObject* args, PyObject* keywords) {
     unsigned long long start, end;
     unsigned short flags = maat::mem_flag_rwx;
@@ -52,6 +63,15 @@ static PyObject* MemEngine_map(PyObject* self, PyObject* args, PyObject* keyword
     Py_RETURN_NONE;
 }
 
+PyDoc_STRVAR(
+    MemEngine_read_doc,
+    "read(addr: int|Value, size: int) -> Value\n"
+    "\n"
+    "Read a value from memory.\n"
+    "\n"
+    ":param int|Value addr: Address to read. If the address is not concrete, the method performs a _symbolic pointer read_\n"
+    ":param int size: Number of bytes to read\n"
+);
 static PyObject* MemEngine_read(PyObject* self, PyObject* args) {
     unsigned int nb_bytes;
     Value res;
@@ -80,7 +100,16 @@ static PyObject* MemEngine_read(PyObject* self, PyObject* args) {
     return PyValue_FromValue(res);
 }
 
-
+PyDoc_STRVAR(
+    MemEngine_read_buffer_doc,
+    "read_buffer(addr: int|Value, nb_elems: int, elem_size: int=1) -> List[Value]\n"
+    "\n"
+    "Read a buffer from memory and return it as a list of expressions.\n"
+    "\n"
+    ":param int|Value addr: Address to read. Can be an abstract address. Does not work with fully symbolic addresses.\n"
+    ":param int nb_elems: Number of elements to read\n"
+    ":param int elem_size: (Optional) Size of each element\n"
+);
 static PyObject* MemEngine_read_buffer(PyObject* self, PyObject* args) {
     PyObject* addr;
     unsigned int nb_elems, elem_size=1;
@@ -121,12 +150,21 @@ static PyObject* MemEngine_read_buffer(PyObject* self, PyObject* args) {
     return list;
 }
 
+PyDoc_STRVAR(
+    MemEngine_read_str_doc,
+    "read_str(addr: int|Value, length: int=0) -> bytes\n"
+    "\n"
+    "Read a string from memory.\n"
+    "\n"
+    ":param int|Value addr: Address to read. Can be an abstract address. Does not work with fully symbolic addresses.\n"
+    ":param int length: (Optional) Length of the string to read. If `0`, reads a null terminated string"
+);
 static PyObject* MemEngine_read_str(PyObject* self, PyObject* args) {
     PyObject* addr;
     unsigned int len=0;
     std::string res;
     PyObject* bytes;
-    
+
     if( !PyArg_ParseTuple(args, "O|I", &addr, &len)){
         return NULL;
     }
@@ -157,6 +195,18 @@ static PyObject* MemEngine_read_str(PyObject* self, PyObject* args) {
 }
 
 
+PyDoc_STRVAR(
+    MemEngine_write_doc,
+    "write(addr: int|Value, value: int, size: int, ignore_flags: bool=False)\n"
+    "\n"
+    "Write a concrete value to memory\n"
+    "\n"
+    ":param int|Value addr: Address to read. Can be an abstract address. Does not work with fully symbolic addresses.\n"
+    ":param int value: Value to write\n"
+    ":param int size: Size in bytes of the value to write\n"
+    ":param bool ignore_flags: (Optional) If `True`, writes without checking `PERM.W` access flag"
+);
+// TODO: split these into several write_* functions since these overloads are impossible to have in python
 static PyObject* MemEngine_write(PyObject* self, PyObject* args, PyObject* keywords)
 {
     addr_t concrete_addr;
@@ -244,6 +294,20 @@ static PyObject* MemEngine_write(PyObject* self, PyObject* args, PyObject* keywo
     Py_RETURN_NONE;
 }
 
+PyDoc_STRVAR(
+    MemEngine_make_concolic_doc,
+    "make_concolic(addr: int, nb_elems: int, elem_size: int, name: str) -> str\n"
+    "\n"
+    "Make memory content concolic. The method creates a new set of nb_elems abstract variables of size elem_size bytes. "
+    "It follows the same naming strategy as `MemEngine.make_symbolic()` for the variables. The current concrete values "
+    "present in memory are automatically bound to the new variables in the engine's `VarContext` (so the created variables "
+    "are not purely symbolic and can still be concretized). The method returns the base name of the created symbolic variables\n"
+    "\n"
+    ":param int addr: Start address\n"
+    ":param int nb_elems: Number of elements to create\n"
+    ":param int elem_size: Size of each element in bytes\n"
+    ":param str name: Preferred base name for the created variables"
+);
 PyObject* MemEngine_make_concolic(PyObject* self, PyObject* args){
     unsigned long long addr;
     unsigned int nb_elems, elem_size;
@@ -266,6 +330,22 @@ PyObject* MemEngine_make_concolic(PyObject* self, PyObject* args){
 }
 
 
+PyDoc_STRVAR(
+    MemEngine_make_symbolic_doc,
+    "make_symbolic(addr: int, nb_elems: int, elem_size: int, name: str) -> str\n"
+    "\n"
+    "Make memory content purely symbolic. The method creates a new set of nb_elems purely symbolic variables of "
+    "size `elem_size` bytes. The variables are named according to the name parameter. If name='myvar' then the "
+    "created variables are named 'myvar_0', 'myvar_1', etc. If the requested name isn't available, another name "
+    "will be automatically selected (for example 'myvar1' instead of 'myvar', then the created variables are "
+    "'myvar1_0', 'myvar1_1', etc). In any case, the method returns the chosen base name of the created symbolic "
+    "variables.\n"
+    "\n"
+    ":param int addr: Start address\n"
+    ":param int nb_elems: Number of elements to create\n"
+    ":param int elem_size: Size of each element in bytes\n"
+    ":param str name: Preferred base name for the created variables"
+);
 PyObject* MemEngine_make_symbolic(PyObject* self, PyObject* args){
     unsigned long long addr;
     unsigned int nb_elems, elem_size;
@@ -289,13 +369,13 @@ PyObject* MemEngine_make_symbolic(PyObject* self, PyObject* args){
 
 
 static PyMethodDef MemEngine_methods[] = {
-    {"map", (PyCFunction)MemEngine_map, METH_VARARGS | METH_KEYWORDS, "Map a memory region"},
-    {"read", (PyCFunction)MemEngine_read, METH_VARARGS, "Reads memory into an expression"},
-    {"read_buffer", (PyCFunction)MemEngine_read_buffer, METH_VARARGS, "Reads a buffer in memory"},
-    {"read_str", (PyCFunction)MemEngine_read_str, METH_VARARGS, "Reads a concrete string in memory"},
-    {"write", (PyCFunction)MemEngine_write, METH_VARARGS | METH_KEYWORDS, "Write a value/expression/buffer into memory"},
-    {"make_concolic", (PyCFunction)MemEngine_make_concolic, METH_VARARGS, "Make a memory area concolic"},
-    {"make_symbolic", (PyCFunction)MemEngine_make_symbolic, METH_VARARGS, "Make a memory area purely symbolic"},
+    {"map", (PyCFunction)MemEngine_map, METH_VARARGS | METH_KEYWORDS, MemEngine_map_doc},
+    {"read", (PyCFunction)MemEngine_read, METH_VARARGS, MemEngine_read_doc},
+    {"read_buffer", (PyCFunction)MemEngine_read_buffer, METH_VARARGS, MemEngine_read_buffer_doc},
+    {"read_str", (PyCFunction)MemEngine_read_str, METH_VARARGS, MemEngine_read_str_doc},
+    {"write", (PyCFunction)MemEngine_write, METH_VARARGS | METH_KEYWORDS, MemEngine_write_doc},
+    {"make_concolic", (PyCFunction)MemEngine_make_concolic, METH_VARARGS, MemEngine_make_concolic_doc},
+    {"make_symbolic", (PyCFunction)MemEngine_make_symbolic, METH_VARARGS, MemEngine_make_symbolic_doc},
     {NULL, NULL, 0, NULL}
 };
 
