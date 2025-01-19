@@ -26,12 +26,24 @@ static void Solver_dealloc(PyObject* self)
     Py_TYPE(self)->tp_free((PyObject *)self);
 };
 
+PyDoc_STRVAR(
+    Solver_reset_doc,
+    "reset()\n"
+    "\n"
+    "Remove all constraints from the solver"
+);
 static PyObject* Solver_reset(PyObject* self)
 {
     as_solver_object(self).solver->reset();
     Py_RETURN_NONE;
 };
 
+PyDoc_STRVAR(
+    Solver_add_doc,
+    "add(constraint: Constraint)\n"
+    "\n"
+    "Add a constraint to the solver."
+);
 static PyObject* Solver_add(PyObject* self, PyObject* args)
 {
     PyObject* constr;
@@ -44,6 +56,14 @@ static PyObject* Solver_add(PyObject* self, PyObject* args)
     Py_RETURN_NONE;
 };
 
+PyDoc_STRVAR(
+    Solver_check_doc,
+    "check() -> bool\n"
+    "\n"
+    "Solve the current constraints. Return `True` on success and `False` "
+    "on failure. If the check was successful, the generated model can be obtained "
+    "by calling `get_model()`."
+);
 static PyObject* Solver_check(PyObject* self)
 {
     bool res;
@@ -55,6 +75,12 @@ static PyObject* Solver_check(PyObject* self)
         Py_RETURN_FALSE;
 };
 
+PyDoc_STRVAR(
+    Solver_get_model_doc,
+    "get_model() -> VarContext\n"
+    "\n"
+    "If a model exists, return the model as a 'VarContext' instance, otherwise `None`."
+);
 static PyObject* Solver_get_model(PyObject* self)
 {
     VarContext* res = as_solver_object(self).solver->_get_model_raw();
@@ -64,10 +90,10 @@ static PyObject* Solver_get_model(PyObject* self)
 };
 
 static PyMethodDef Solver_methods[] = {
-    {"reset", (PyCFunction)Solver_reset, METH_NOARGS, "Remove all constraints from the solver"},
-    {"add", (PyCFunction)Solver_add, METH_VARARGS, "Add a constraint to the solver"},
-    {"check", (PyCFunction)Solver_check, METH_NOARGS, "Check if a model exists for the current constraints"},
-    {"get_model", (PyCFunction)Solver_get_model, METH_NOARGS, "If a model exists, return the model as a 'VarContext' instance"},
+    {"reset", (PyCFunction)Solver_reset, METH_NOARGS, Solver_reset_doc},
+    {"add", (PyCFunction)Solver_add, METH_VARARGS, Solver_add_doc},
+    {"check", (PyCFunction)Solver_check, METH_NOARGS, Solver_check_doc},
+    {"get_model", (PyCFunction)Solver_get_model, METH_NOARGS, Solver_get_model_doc},
     {NULL, NULL, 0, NULL}
 };
 
@@ -102,8 +128,8 @@ static PyObject* Solver_get_did_time_out(PyObject* self, void* closure)
 
 static PyGetSetDef Solver_getset[] =
 {
-    {"timeout", Solver_get_timeout, Solver_set_timeout, "Maximum time to spend to solve a constraint (in milliseconds)", NULL},
-    {"did_time_out", Solver_get_did_time_out, NULL, "True if the last call to check() timed out", NULL},
+    {"timeout", Solver_get_timeout, Solver_set_timeout, "type=int\nMaximum time to spend to solve a constraint (in milliseconds)", NULL},
+    {"did_time_out", Solver_get_did_time_out, NULL, "type=bool\nTrue if the last call to check() timed out", NULL},
     {NULL}
 };
 

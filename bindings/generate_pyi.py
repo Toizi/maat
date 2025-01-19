@@ -111,7 +111,7 @@ def import_module(module_path):
 def generate_pyi(module , fail_on_sig_err: bool) -> str:
     s = ''
     s += 'from enum import IntEnum\n'
-    s += 'from typing import Any, List, Callable, Tuple\n'
+    s += 'from typing import Any, Callable, Iterator, Optional\n'
 
     for name, obj in inspect.getmembers(module):
         if name.startswith('__'):

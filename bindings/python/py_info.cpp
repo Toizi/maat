@@ -63,11 +63,11 @@ static PyObject* RegAccess_get_written(PyObject* self, void* closure){
 }
 
 static PyGetSetDef RegAccess_getset[] = {
-    {"read", RegAccess_get_read, NULL, "Is the register being read", NULL},
-    {"written", RegAccess_get_written, NULL, "Is the register being written", NULL},
-    {"reg", RegAccess_get_reg, NULL, "Register being accessed", NULL},
-    {"new_value", RegAccess_get_new_value, NULL, "Value that is written to the register", NULL},
-    {"value", RegAccess_get_value, NULL, "Current value of the register", NULL},
+    {"read", RegAccess_get_read, NULL, "type=bool\nIs the register being read", NULL},
+    {"written", RegAccess_get_written, NULL, "type=bool\nIs the register being written", NULL},
+    {"reg", RegAccess_get_reg, NULL, "type=str\nRegister being accessed", NULL},
+    {"new_value", RegAccess_get_new_value, NULL, "type=Value\nValue that is written to the register (same as `value` if register is not written)", NULL},
+    {"value", RegAccess_get_value, NULL, "type=Value\nCurrent value of the register", NULL},
     {NULL}
 };
 
@@ -200,11 +200,11 @@ static PyObject* MemAccess_get_written(PyObject* self, void* closure){
 }
 
 static PyGetSetDef MemAccess_getset[] = {
-    {"addr", MemAccess_get_addr, NULL, "Expression of the address where the memory is accessed", NULL},
-    {"read", MemAccess_get_read, NULL, "Is the memory being read", NULL},
-    {"written", MemAccess_get_written, NULL, "Is the memory being written", NULL},
-    {"size", MemAccess_get_size, NULL, "Number of bytes accessed", NULL},
-    {"value", MemAccess_get_value, NULL, "Value read/written from/to memory", NULL},
+    {"addr", MemAccess_get_addr, NULL, "type=Value\nExpression of the address where the memory is accessed", NULL},
+    {"read", MemAccess_get_read, NULL, "type=bool\nIs the memory being read", NULL},
+    {"written", MemAccess_get_written, NULL, "type=bool\nIs the memory being written", NULL},
+    {"size", MemAccess_get_size, NULL, "type=int\nNumber of bytes accessed", NULL},
+    {"value", MemAccess_get_value, NULL, "type=Value\nValue read/written from/to memory", NULL},
     {NULL}
 };
 
@@ -491,12 +491,12 @@ static PyObject* Info_get_reg_access(PyObject* self, void* closure){
 }
 
 static PyGetSetDef Info_getset[] = {
-    {"stop", Info_get_stop, NULL, "Reason why emulation stopped", NULL},
-    {"addr", Info_get_addr, Info_set_addr, "Address of the instruction where the engine stopped", NULL},
-    {"exit_status", Info_get_exit_status, NULL, "Exit value of the program", NULL},
-    {"branch", Info_get_branch, NULL, "Branch operation info", NULL},
-    {"reg_access", Info_get_reg_access, NULL, "Register access info", NULL},
-    {"mem_access", Info_get_mem_access, NULL, "Memory access info", NULL},
+    {"stop", Info_get_stop, NULL, "type=STOP\nReason why emulation stopped", NULL},
+    {"addr", Info_get_addr, Info_set_addr, "type=int\nAddress of the instruction where the engine stopped", NULL},
+    {"exit_status", Info_get_exit_status, NULL, "type=int|None\nExit value of the program", NULL},
+    {"branch", Info_get_branch, NULL, "type=Branch\nBranch operation info", NULL},
+    {"reg_access", Info_get_reg_access, NULL, "type=RegAccess|None\nRegister access info", NULL},
+    {"mem_access", Info_get_mem_access, NULL, "type=MemAccess|None\nMemory access info", NULL},
     {NULL}
 };
 

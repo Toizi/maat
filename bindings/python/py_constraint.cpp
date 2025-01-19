@@ -41,7 +41,7 @@ static PyObject* Constraint_invert(PyObject* self) {
 
 PyDoc_STRVAR(
     Constraint_contained_vars_doc,
-    "contained_vars() -> List[str]\n"
+    "contained_vars() -> list[str]\n"
     "\n"
     "Returns a list of the contained vars of this constraint"
 );

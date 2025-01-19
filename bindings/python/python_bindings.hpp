@@ -58,7 +58,6 @@ typedef struct {
     VarContext* ctx;
     bool is_ref; // Tells if it is owned or just a reference
 } VarContext_Object;
-PyObject* maat_VarContext(PyObject* self, PyObject* args);
 PyObject* PyVarContext_FromVarContext(VarContext* ctx, bool is_ref);
 PyObject* get_VarContext_Type();
 #define as_varctx_object(x) (*((VarContext_Object*)x))

@@ -32,14 +32,14 @@ static PyObject* EventManager_repr(PyObject* self)
 
 PyDoc_STRVAR(
     EventManager_add_doc,
-    "add(event: EVENT, when: WHEN, name: str='', filter: int|Tuple[int, int]=-1, callbacks: List[Callable]=[], group: str='') -> int\n"
+    "add(event: EVENT, when: WHEN, name: str='', filter: int|tuple[int, int]=-1, callbacks: list[Callable]=[], group: str='') -> int\n"
     "\n"
     ":param EVENT event: Event to hook\n"
     ":param WHEN when: When to trigger the hook (before or after the event)\n"
     ":param str name: (Optional) Unique name to identify the hook\n"
-    ":param int|Tuple[int,int] filter: (Optional) Address range on which to trigger the hook. It is used only for memory access events and the EVENT.EXEC event."
+    ":param int|tuple[int,int] filter: (Optional) Address range on which to trigger the hook. It is used only for memory access events and the EVENT.EXEC event."
     "The parameter can be a single integer to monitor a single address, or a tuple of two integers to monitor a range of addresses.\n"
-    ":param List[Callable] callbacks: (Optional) List of callbacks to be called every time the hook is triggered\n"
+    ":param list[Callable] callbacks: (Optional) List of callbacks to be called every time the hook is triggered\n"
     ":param str group: (Optional) Group of the hook"
 );
 static PyObject* EventManager_add(PyObject* self, PyObject*args, PyObject* keywords)

@@ -313,10 +313,10 @@ PyObject* generic_buffer_translate(std::vector<Value>& native_buf, PyObject* buf
 
 PyDoc_STRVAR(
     FileAccessor_write_buffer_doc,
-    "write_buffer(buffer: bytes|List[Value]) -> int\n"
+    "write_buffer(buffer: bytes|list[Value]) -> int\n"
     "\n"
     "Write a buffer to a symbolic file. Returns the number of bytes written.\n"
-    ":param bytes|List[Value] buffer: Concrete bytes or abstract values to write to the file"
+    ":param bytes|list[Value] buffer: Concrete bytes or abstract values to write to the file"
 );
 static PyObject* FileAccessor_write_buffer(PyObject* self, PyObject *args)
 {
@@ -354,7 +354,7 @@ static PyObject* FileAccessor_write_buffer(PyObject* self, PyObject *args)
 
 PyDoc_STRVAR(
     FileAccessor_read_buffer_doc,
-    "read_buffer(offset: int, nb_elems: int, elem_size: int=1) -> List[Value]\n"
+    "read_buffer(offset: int, nb_elems: int, elem_size: int=1) -> list[Value]\n"
     "\n"
     "Read a buffer from a file at a given offset.\n"
     ":param int offset: The offset from the beginning of the file of where to start reading\n"
@@ -476,11 +476,11 @@ static void File_dealloc(PyObject* self)
 
 PyDoc_STRVAR(
     File_write_buffer_doc,
-    "write_buffer(offset: int, buffer: bytes|List[Value]) -> int\n"
+    "write_buffer(offset: int, buffer: bytes|list[Value]) -> int\n"
     "\n"
     "Write a buffer to a symbolic file. Returns the number of bytes written.\n"
     ":param int offset: The offset from the beginning of the file of where to start writing\n"
-    ":param bytes|List[Value] buffer: Concrete bytes or abstract values to write to the file"
+    ":param bytes|list[Value] buffer: Concrete bytes or abstract values to write to the file"
 );
 static PyObject* File_write_buffer(PyObject* self, PyObject *args)
 {
@@ -521,7 +521,7 @@ static PyObject* File_write_buffer(PyObject* self, PyObject *args)
 
 PyDoc_STRVAR(
     File_read_buffer_doc,
-    "read_buffer(offset: int, nb_elems: int, elem_size: int=1) -> List[Value]\n"
+    "read_buffer(offset: int, nb_elems: int, elem_size: int=1) -> list[Value]\n"
     "\n"
     "Read a buffer from a file at a given offset.\n"
     ":param int offset: The offset from the beginning of the file of where to start reading\n"

@@ -41,6 +41,14 @@ static PyObject* Value_repr(PyObject* self)
     return Value_str(self);
 }
 
+PyDoc_STRVAR(
+    Value_is_concolic_doc,
+    "is_concolic(ctx: Optional[VarContext]) -> bool\n"
+    "\n"
+    "Returns `True` if the expression is concolic.\n"
+    "\n"
+    ":param VarContext ctx: (Optional) context to use to check the expression status."
+);
 static PyObject* Value_is_concolic(PyObject* self, PyObject* args)
 {
     PyObject* varctx = nullptr;
@@ -55,6 +63,14 @@ static PyObject* Value_is_concolic(PyObject* self, PyObject* args)
         return PyErr_Format(PyExc_RuntimeError, "Value isn't bound to a VarContext");
 }
 
+PyDoc_STRVAR(
+    Value_is_concrete_doc,
+    "is_concrete(ctx: Optional[VarContext]) -> bool\n"
+    "\n"
+    "Returns `True` if the expression is concrete.\n"
+    "\n"
+    ":param VarContext ctx: (Optional) context to use to check the expression status."
+);
 static PyObject* Value_is_concrete(PyObject* self, PyObject* args)
 {
     PyObject* varctx = nullptr;
@@ -68,9 +84,16 @@ static PyObject* Value_is_concrete(PyObject* self, PyObject* args)
         return PyBool_FromLong((*(as_value_object(self).value)).is_concrete(**as_value_object(self).varctx));
     else
         return PyErr_Format(PyExc_RuntimeError, "Value isn't bound to a VarContext");
-        
 }
 
+PyDoc_STRVAR(
+    Value_is_symbolic_doc,
+    "is_symbolic(ctx: Optional[VarContext]) -> bool\n"
+    "\n"
+    "Returns `True` if the expression is symbolic.\n"
+    "\n"
+    ":param VarContext ctx: (Optional) context to use to check the expression status."
+);
 static PyObject* Value_is_symbolic(PyObject* self, PyObject* args){
     PyObject* varctx = nullptr;
     if( !PyArg_ParseTuple(args, "|O!", get_VarContext_Type(), &varctx)){
@@ -85,10 +108,18 @@ static PyObject* Value_is_symbolic(PyObject* self, PyObject* args){
         return PyErr_Format(PyExc_RuntimeError, "Value isn't bound to a VarContext");
 }
 
+PyDoc_STRVAR(
+    Value_as_uint_doc,
+    "as_uint(ctx: Optional[VarContext]) -> int\n"
+    "\n"
+    "Returns the concrete value of the expression interpreted as an unsigned integer.\n"
+    "\n"
+    ":param VarContext ctx: (Optional) context to use to concretize the expression, instead of the default one."
+);
 static PyObject* Value_as_uint(PyObject* self, PyObject* args)
 {
     PyObject* varctx = nullptr;
-    
+
     if( !PyArg_ParseTuple(args, "|O!", get_VarContext_Type(), &varctx))
     {
         return NULL;
@@ -127,10 +158,18 @@ static PyObject* Value_as_uint(PyObject* self, PyObject* args)
     }
 }
 
+PyDoc_STRVAR(
+    Value_as_int_doc,
+    "as_int(ctx: Optional[VarContext]) -> int\n"
+    "\n"
+    "Returns the concrete value of the expression interpreted as a signed integer.\n"
+    "\n"
+    ":param VarContext ctx: (Optional) context to use to concretize the expression, instead of the default one."
+);
 static PyObject* Value_as_int(PyObject* self, PyObject* args)
 {
     PyObject* varctx = nullptr;
-    
+
     if( !PyArg_ParseTuple(args, "|O!", get_VarContext_Type(), &varctx))
     {
         return NULL;
@@ -169,10 +208,18 @@ static PyObject* Value_as_int(PyObject* self, PyObject* args)
     }
 }
 
+PyDoc_STRVAR(
+    Value_as_float_doc,
+    "as_float(ctx: Optional[VarContext]) -> int\n"
+    "\n"
+    "Returns the concrete value of the expression interpreted as a floating point value.\n"
+    "\n"
+    ":param VarContext ctx: (Optional) context to use to concretize the expression, instead of the default one."
+);
 static PyObject* Value_as_float(PyObject* self, PyObject* args)
 {
     PyObject* varctx = nullptr;
-    
+
     if( !PyArg_ParseTuple(args, "|O!", get_VarContext_Type(), &varctx)){
         return NULL;
     }
@@ -201,17 +248,6 @@ static PyObject* Value_as_float(PyObject* self, PyObject* args)
     }
 }
 
-static PyObject* Value_eq(PyObject* self, PyObject* args)
-{
-    PyObject* other = nullptr;
-    if( !PyArg_ParseTuple(args, "O!", get_Value_Type(), &other)){
-        return NULL;
-    }
-    return PyBool_FromLong(
-        as_value_object(self).value->eq(*as_value_object(other).value)
-    );
-}
-
 static PyObject* Value_get_size(PyObject* self, void* closure)
 {
     return PyLong_FromLong((*as_value_object(self).value).size());
@@ -235,20 +271,19 @@ static PyObject* Value_get_name(PyObject* self, void* closure)
 
 static PyMethodDef Value_methods[] = 
 {
-    {"is_concolic", (PyCFunction)Value_is_concolic, METH_VARARGS, "Check whether the value is concolic"},
-    {"is_concrete", (PyCFunction)Value_is_concrete, METH_VARARGS, "Check whether the value is concrete"},
-    {"is_symbolic", (PyCFunction)Value_is_symbolic, METH_VARARGS, "Check whether the value is symbolic"},
-    {"as_int", (PyCFunction)Value_as_int, METH_VARARGS, "Concretize the value interpreted as a signed value"},
-    {"as_uint", (PyCFunction)Value_as_uint, METH_VARARGS, "Concretize the value interpreted as an unsigned value"},
-    {"as_float", (PyCFunction)Value_as_float, METH_VARARGS, "Concretize the value interpreted as a floating point value"},
-    {"eq", (PyCFunction)Value_eq, METH_VARARGS, "Return True if two values are identical (same abstract syntax tree)"},
+    {"is_concolic", (PyCFunction)Value_is_concolic, METH_VARARGS, Value_is_concolic_doc},
+    {"is_concrete", (PyCFunction)Value_is_concrete, METH_VARARGS, Value_is_concrete_doc},
+    {"is_symbolic", (PyCFunction)Value_is_symbolic, METH_VARARGS, Value_is_symbolic_doc},
+    {"as_int", (PyCFunction)Value_as_int, METH_VARARGS, Value_as_int_doc},
+    {"as_uint", (PyCFunction)Value_as_uint, METH_VARARGS, Value_as_uint_doc},
+    {"as_float", (PyCFunction)Value_as_float, METH_VARARGS, Value_as_float_doc},
     {NULL, NULL, 0, NULL}
 };
 
 static PyGetSetDef Value_getset[] =
 {
-    {"size", Value_get_size, NULL, "Value size in bits", NULL},
-    {"name", Value_get_name, NULL, "Variable name (throws AttributeError if the value is not a symbolic variable)", NULL},
+    {"size", Value_get_size, NULL, "type=int\nValue size in bits", NULL},
+    {"name", Value_get_name, NULL, "type=str\nVariable name (throws AttributeError if the value is not a symbolic variable)", NULL},
     {NULL}
 };
 
@@ -294,21 +329,21 @@ static PyNumberMethods Value_operators; // Empty PyNumberMethods, will be filled
 /* Type description for python Value objects */
 PyTypeObject Value_Type = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    "Value",                                   /* tp_name */
-    sizeof(Value_Object),                      /* tp_basicsize */
+    "Value",                                  /* tp_name */
+    sizeof(Value_Object),                     /* tp_basicsize */
     0,                                        /* tp_itemsize */
-    (destructor)Value_dealloc,                 /* tp_dealloc */
-    (printfunc)Value_print,                    /* tp_print */
+    (destructor)Value_dealloc,                /* tp_dealloc */
+    (printfunc)Value_print,                   /* tp_print */
     0,                                        /* tp_getattr */
     0,                                        /* tp_setattr */
     0,                                        /* tp_reserved */
-    Value_repr,                                /* tp_repr */
-    &Value_operators,                          /* tp_as_number */
+    Value_repr,                               /* tp_repr */
+    &Value_operators,                         /* tp_as_number */
     0,                                        /* tp_as_sequence */
     0,                                        /* tp_as_mapping */
     (hashfunc)Value_hash,                     /* tp_hash  */
     0,                                        /* tp_call */
-    Value_str,                                 /* tp_str */
+    Value_str,                                /* tp_str */
     0,                                        /* tp_getattro */
     0,                                        /* tp_setattro */
     0,                                        /* tp_as_buffer */
@@ -316,13 +351,13 @@ PyTypeObject Value_Type = {
     "Abstract expression",                    /* tp_doc */
     0,                                        /* tp_traverse */
     0,                                        /* tp_clear */
-    Value_richcompare,                         /* tp_richcompare */
+    Value_richcompare,                        /* tp_richcompare */
     0,                                        /* tp_weaklistoffset */
     0,                                        /* tp_iter */
     0,                                        /* tp_iternext */
-    Value_methods,                             /* tp_methods */
+    Value_methods,                            /* tp_methods */
     0,                                        /* tp_members */
-    Value_getset,                              /* tp_getset */
+    Value_getset,                             /* tp_getset */
     0,                                        /* tp_base */
     0,                                        /* tp_dict */
     0,                                        /* tp_descr_get */
@@ -616,6 +651,23 @@ PyObject* PyValue_FromValueAndVarContext(const Value& e, std::shared_ptr<VarCont
 }
 
 // ============== VarContext ================
+PyDoc_STRVAR(
+    VarContext_doc,
+    "VarContext()"
+    "\n"
+    "This class holds a mapping between abstract variables and concrete values. "
+    "It is used to perform concolic execution, so that abstract symbolic variables can be concretized."
+);
+int VarContext_init(VarContext_Object* self, PyObject* args, PyObject *kwds)
+{
+    if( !PyArg_ParseTuple(args, "") ){
+        return -1;
+    }
+    self->ctx = new VarContext();
+    self->is_ref = false;
+    return 0;
+}
+
 static void VarContext_dealloc(PyObject* self)
 {
     if( ! as_varctx_object(self).is_ref){
@@ -643,6 +695,12 @@ static PyObject* VarContext_repr(PyObject* self)
     return VarContext_str(self);
 }
 
+PyDoc_STRVAR(
+    VarContext_set_doc,
+    "set(name: str, val: int, bits: int=64)\n"
+    "\n"
+    "Set concrete value for abstract variable."
+);
 static PyObject* VarContext_set(PyObject* self, PyObject* args)
 {
     const char * name;
@@ -658,10 +716,16 @@ static PyObject* VarContext_set(PyObject* self, PyObject* args)
     Py_RETURN_NONE;
 }
 
+PyDoc_STRVAR(
+    VarContext_get_doc,
+    "get(name: str) -> str\n"
+    "\n"
+    "Get concrete value for abstract variable."
+);
 static PyObject* VarContext_get(PyObject* self, PyObject* args)
 {
     const char * name;
-    
+
     if( !PyArg_ParseTuple(args, "s", &name)){
         return NULL;
     }
@@ -683,6 +747,15 @@ static PyObject* VarContext_get(PyObject* self, PyObject* args)
     }
 }
 
+PyDoc_STRVAR(
+    VarContext_get_as_buffer_doc,
+    "get_as_buffer(base_name: str, elem_size: int=1) -> bytes\n"
+    "\n"
+    "Return a buffer built from the name base_name. This method iterates on all "
+    "variables that are named 'base_name_0', 'base_name_1', etc, until there are "
+    "no matching variables and returns the buffer built by concatenating their "
+    "individual values reduced or extended to `elem_size` bytes."
+);
 static PyObject* VarContext_get_as_buffer(PyObject* self, PyObject* args)
 {
     const char * name;
@@ -690,11 +763,11 @@ static PyObject* VarContext_get_as_buffer(PyObject* self, PyObject* args)
     char str[4096];
     unsigned int elem_size = 1;
     PyObject* res;
-    
+
     if( !PyArg_ParseTuple(args, "s|I", &name, &elem_size)){
         return NULL;
     }
-    
+
     buffer = as_varctx_object(self).ctx->get_as_buffer(std::string(name), elem_size);
     if( buffer.size() > sizeof(str) ){
         return PyErr_Format(PyExc_RuntimeError, "Buffer is too big!");
@@ -703,7 +776,7 @@ static PyObject* VarContext_get_as_buffer(PyObject* self, PyObject* args)
             str[i] = (char)buffer[i];
         }
     }
-    
+
     res = PyBytes_FromStringAndSize(str, buffer.size());
     if( res == nullptr ){
         return PyErr_Format(PyExc_RuntimeError, "Internal error: couldn't build bytes from string!");
@@ -712,7 +785,16 @@ static PyObject* VarContext_get_as_buffer(PyObject* self, PyObject* args)
     return res;
 }
 
-static PyObject* VarContext_get_as_string(PyObject* self, PyObject* args)
+PyDoc_STRVAR(
+    VarContext_get_as_str_doc,
+    "get_as_str(base_name: str) -> str\n"
+    "\n"
+    "Similar to `VarContext.get_as_buffer()`.\n"
+    "Return a string built from the name `base_name`. This method iterates on all variables that are "
+    "named `base_name_0`, `base_name_1`, etc, until there are no matching variables or one variable has "
+    "a null value, and returns the string built by concatenating their individual values interpreted as chars."
+);
+static PyObject* VarContext_get_as_str(PyObject* self, PyObject* args)
 {
     const char * name;
     std::string s;
@@ -741,6 +823,21 @@ static PyObject* VarContext_get_as_string(PyObject* self, PyObject* args)
     return res;
 }
 
+PyDoc_STRVAR(
+    VarContext_new_concolic_buffer_doc,
+    "new_concolic_buffer(name: str, concrete_buffer: list[int]|bytes, nb_elems: int, elem_size: int=1, trailing_value: Optional[int]=None) -> list[Value]\n"
+    "\n"
+    "Return a new buffer of concolic values.\n"
+    "\n"
+    ":param str name: Base name for the abstract variables\n"
+    ":param list[int]|bytes concrete_buffer: Concrete values to assign to bind to the created abstract variables. "
+    "If a list of integer is used, each variable gets its value from the corresponding `int` in the list. If a `bytes` "
+    "object is used, each variable gets its value from the concrete bytes according to `elem_size` and `nb_elems` so "
+    "that writing the resulting concolic buffer to memory matches `concrete_buffer`\n"
+    ":param int nb_elems: Number of variables to create\n"
+    ":param int elem_size: (Optional) Size of each variable in bytes\n"
+    ":param Optional[int] trailing_value: (Optional) If specified, append a concrete value to the returned buffer. The trailing value is not included in the `nb_elems` count\n"
+);
 static PyObject* VarContext_new_concolic_buffer(PyObject* self, PyObject* args, PyObject* keywords)
 {
     const char * name;
@@ -840,6 +937,17 @@ static PyObject* VarContext_new_concolic_buffer(PyObject* self, PyObject* args, 
     return native_to_py(res);
 }
 
+PyDoc_STRVAR(
+    VarContext_new_symbolic_buffer_doc,
+    "new_symbolic_buffer(name: str, nb_elems: int, elem_size: int=1, trailing_value: Optional[int]=None) -> list[Value]\n"
+    "\n"
+    "Return a new buffer of symbolic variables.\n"
+    "\n"
+    ":param str name: Base name for the abstract variables\n"
+    ":param int nb_elems: Number of variables to create\n"
+    ":param int elem_size: (Optional) Size of each variable in bytes\n"
+    ":param Optional[int] trailing_value: (Optional) If specified, append a concrete value to the returned buffer. The trailing value is not included in the `nb_elems` count\n"
+);
 static PyObject* VarContext_new_symbolic_buffer(PyObject* self, PyObject* args, PyObject* keywords)
 {
     const char * name;
@@ -876,10 +984,16 @@ static PyObject* VarContext_new_symbolic_buffer(PyObject* self, PyObject* args, 
     return native_to_py(res);
 }
 
+PyDoc_STRVAR(
+    VarContext_remove_doc,
+    "remove(name: str)\n"
+    "\n"
+    "Unbind a variabe from its concrete value. The variable becomes purely symbolic in this context."
+);
 static PyObject* VarContext_remove(PyObject* self, PyObject* args)
 {
     const char * name;
-    
+
     if( !PyArg_ParseTuple(args, "s", &name)){
         return NULL;
     }
@@ -888,24 +1002,38 @@ static PyObject* VarContext_remove(PyObject* self, PyObject* args)
     Py_RETURN_NONE;
 }
 
+PyDoc_STRVAR(
+    VarContext_contains_doc,
+    "contains(name: str) -> bool\n"
+    "\n"
+    "Return `True` if the variable `name` is bound to a concrete value in this context."
+);
 static PyObject* VarContext_contains(PyObject* self, PyObject* args)
 {
     const char * name;
-    
+
     if( !PyArg_ParseTuple(args, "s", &name)){
         return NULL;
     }
-    
+
     if( as_varctx_object(self).ctx->contains(std::string(name)))
         Py_RETURN_TRUE;
     else
         Py_RETURN_FALSE;
 }
 
+PyDoc_STRVAR(
+    VarContext_update_from_doc,
+    "update_from(other: VarContext)\n"
+    "\n"
+    "Update the context contents from another context. All variables and associated concrete "
+    "values are copied from `other`. If a variable exists both in this context and in `other`, "
+    "it takes the value it has in other."
+);
 static PyObject* VarContext_update_from(PyObject* self, PyObject* args)
 {
     PyObject* other;
-    
+
     if( !PyArg_ParseTuple(args, "O!", PyObject_Type(self), &other)){
         return NULL;
     }
@@ -913,7 +1041,12 @@ static PyObject* VarContext_update_from(PyObject* self, PyObject* args)
     Py_RETURN_NONE;
 }
 
-
+PyDoc_STRVAR(
+    VarContext_contained_vars_doc,
+    "contained_vars() -> list[str]\n"
+    "\n"
+    "Get the list of contained symbolic variables."
+);
 static PyObject* VarContext_contained_vars(PyObject* self)
 {
     PyObject* list = PyList_New(0);
@@ -932,16 +1065,16 @@ static PyObject* VarContext_contained_vars(PyObject* self)
 }
 
 static PyMethodDef VarContext_methods[] = {
-    {"set", (PyCFunction)VarContext_set, METH_VARARGS, "Give a concrete value to a symbolic variable"},
-    {"get", (PyCFunction)VarContext_get, METH_VARARGS, "Give the concrete value associated with a symbolic variable"},
-    {"get_as_buffer", (PyCFunction)VarContext_get_as_buffer, METH_VARARGS, "Give the buffer associated with a certain symbolic variable prefix"},
-    {"get_as_str", (PyCFunction)VarContext_get_as_string, METH_VARARGS, "Give the string associated with a certain symbolic variable prefix"},
-    {"remove", (PyCFunction)VarContext_remove, METH_VARARGS, "Remove the concrete value associated with a symbolic variable"},
-    {"contains", (PyCFunction)VarContext_contains, METH_VARARGS, "Check if a given symbolic variable has an associated concrete value"},
-    {"contained_vars", (PyCFunction)VarContext_contained_vars, METH_NOARGS, "Get the list of contained symbolic variables"},
-    {"update_from", (PyCFunction)VarContext_update_from, METH_VARARGS, "Update concrete values associated with symbolic variables according to another VarContext"},
-    {"new_concolic_buffer", (PyCFunction)VarContext_new_concolic_buffer, METH_VARARGS|METH_KEYWORDS, "Create a new buffer of concolic variables"},
-    {"new_symbolic_buffer", (PyCFunction)VarContext_new_symbolic_buffer, METH_VARARGS|METH_KEYWORDS, "Create a new buffer of symbolic variables"},
+    {"set", (PyCFunction)VarContext_set, METH_VARARGS, VarContext_set_doc},
+    {"get", (PyCFunction)VarContext_get, METH_VARARGS, VarContext_get_doc},
+    {"get_as_buffer", (PyCFunction)VarContext_get_as_buffer, METH_VARARGS, VarContext_get_as_buffer_doc},
+    {"get_as_str", (PyCFunction)VarContext_get_as_str, METH_VARARGS, VarContext_get_as_str_doc},
+    {"remove", (PyCFunction)VarContext_remove, METH_VARARGS, VarContext_remove_doc},
+    {"contains", (PyCFunction)VarContext_contains, METH_VARARGS, VarContext_contains_doc},
+    {"contained_vars", (PyCFunction)VarContext_contained_vars, METH_NOARGS, VarContext_contained_vars_doc},
+    {"update_from", (PyCFunction)VarContext_update_from, METH_VARARGS, VarContext_update_from_doc},
+    {"new_concolic_buffer", (PyCFunction)VarContext_new_concolic_buffer, METH_VARARGS|METH_KEYWORDS, VarContext_new_concolic_buffer_doc},
+    {"new_symbolic_buffer", (PyCFunction)VarContext_new_symbolic_buffer, METH_VARARGS|METH_KEYWORDS, VarContext_new_symbolic_buffer_doc},
     {NULL, NULL, 0, NULL}
 };
 
@@ -971,7 +1104,7 @@ static PyTypeObject VarContext_Type = {
     0,                                        /* tp_setattro */
     0,                                        /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT,                       /* tp_flags */
-    "Concrete context for abstract variables", /* tp_doc */
+    VarContext_doc,                           /* tp_doc */
     0,                                        /* tp_traverse */
     0,                                        /* tp_clear */
     0,                                        /* tp_richcompare */
@@ -986,9 +1119,9 @@ static PyTypeObject VarContext_Type = {
     0,                                        /* tp_descr_get */
     0,                                        /* tp_descr_set */
     0,                                        /* tp_dictoffset */
-    0,                                        /* tp_init */
+    (initproc)VarContext_init,                /* tp_init */
     0,                                        /* tp_alloc */
-    0,                                        /* tp_new */
+    PyType_GenericNew,                        /* tp_new */
 };
 
 PyObject* get_VarContext_Type(){
@@ -998,7 +1131,7 @@ PyObject* get_VarContext_Type(){
 /* Constructors */
 PyObject* PyVarContext_FromVarContext(VarContext* ctx, bool is_ref){
     VarContext_Object* object;
-    
+
     // Create object
     PyType_Ready(&VarContext_Type);
     object = PyObject_New(VarContext_Object, &VarContext_Type);
@@ -1007,14 +1140,6 @@ PyObject* PyVarContext_FromVarContext(VarContext* ctx, bool is_ref){
         object->is_ref = is_ref;
     }
     return (PyObject*)object;
-}
-
-PyObject* maat_VarContext(PyObject* self, PyObject* args){
-    if( !PyArg_ParseTuple(args, "") ){
-        return NULL;
-    }
-    VarContext * ctx = new VarContext();
-    return PyVarContext_FromVarContext(ctx, false);
 }
 
 // ========= Module initialisation ===========

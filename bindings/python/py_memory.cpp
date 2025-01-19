@@ -102,7 +102,7 @@ static PyObject* MemEngine_read(PyObject* self, PyObject* args) {
 
 PyDoc_STRVAR(
     MemEngine_read_buffer_doc,
-    "read_buffer(addr: int|Value, nb_elems: int, elem_size: int=1) -> List[Value]\n"
+    "read_buffer(addr: int|Value, nb_elems: int, elem_size: int=1) -> list[Value]\n"
     "\n"
     "Read a buffer from memory and return it as a list of expressions.\n"
     "\n"

@@ -362,7 +362,7 @@ static PyObject* MaatEngine_get_uid(PyObject* self, void* closure){
 
 
 static PyGetSetDef MaatEngine_getset[] = {
-    {"uid", MaatEngine_get_uid, NULL, "Unique ID for this MaatEngine instance", NULL},
+    {"uid", MaatEngine_get_uid, NULL, "type=int\nUnique ID for this MaatEngine instance", NULL},
     {NULL}
 };
 

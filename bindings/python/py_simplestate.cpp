@@ -57,6 +57,12 @@ static void SimpleStateManager_dealloc(PyObject* self){
     Py_TYPE(self)->tp_free((PyObject *)self);
 };
 
+PyDoc_STRVAR(
+    SimpleStateManager_enqueue_state_doc,
+    "enqueue_state(engine: MaatEngine)\n"
+    "\n"
+    "Add engine's current state to the state queue."
+);
 static PyObject* SimpleStateManager_enqueue_state(PyObject* self, PyObject* args)
 {
     PyObject* engine;
@@ -78,10 +84,16 @@ static PyObject* SimpleStateManager_enqueue_state(PyObject* self, PyObject* args
     Py_RETURN_NONE;
 }
 
+PyDoc_STRVAR(
+    SimpleStateManager_dequeue_state_doc,
+    "dequeue_state(engine: MaatEngine) -> bool\n"
+    "\n"
+    "Load next pending state into an engine. Returns `True` on success and `False` if there are no more states to load."
+);
 static PyObject* SimpleStateManager_dequeue_state(PyObject* self, PyObject* args)
 {
     PyObject* engine;
-    
+
     if( !PyArg_ParseTuple(args, "O!", get_MaatEngine_Type(), &engine))
     {
         return NULL;
@@ -112,8 +124,8 @@ static PyObject* SimpleStateManager_dequeue_state(PyObject* self, PyObject* args
 }
 
 static PyMethodDef SimpleStateManager_methods[] = {
-    {"enqueue_state", (PyCFunction)SimpleStateManager_enqueue_state, METH_VARARGS, "Save current state of a MaatEngine in pending states list"},
-    {"dequeue_state", (PyCFunction)SimpleStateManager_dequeue_state, METH_VARARGS, "Load next pending state into MaatEngine"},
+    {"enqueue_state", (PyCFunction)SimpleStateManager_enqueue_state, METH_VARARGS, SimpleStateManager_enqueue_state_doc},
+    {"dequeue_state", (PyCFunction)SimpleStateManager_dequeue_state, METH_VARARGS, SimpleStateManager_dequeue_state_doc},
     {NULL, NULL, 0, NULL}
 };
 

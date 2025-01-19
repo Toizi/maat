@@ -18,7 +18,7 @@ static PyObject* ProcessInfo_get_pid(PyObject* self, void* closure){
 }
 
 static PyGetSetDef ProcessInfo_getset[] = {
-    {"pid", ProcessInfo_get_pid, NULL, "Process PID", NULL},
+    {"pid", ProcessInfo_get_pid, NULL, "type=int\nProcess PID", NULL},
     {NULL}
 };
 

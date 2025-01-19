@@ -15,6 +15,13 @@ static void Path_dealloc(PyObject* self)
 
 
 
+PyDoc_STRVAR(
+    Path_get_related_constraints_doc,
+    "get_related_constraints(x: Value | Constraint) -> Iterator[Constraint]\n"
+    "\n"
+    "Returns an iterator over the current path constraints that are related to x. "
+    "A constraint is considered related if it contains at least one abstract variable in common with x"
+);
 static PyObject* Path_get_related_constraints(PyObject* self, PyObject* args)
 {
     PyObject* arg;
@@ -43,6 +50,12 @@ static PyObject* Path_get_related_constraints(PyObject* self, PyObject* args)
     return native_to_py(res);
 };
 
+PyDoc_STRVAR(
+    Path_get_constraints_containing_doc,
+    "get_constraints_containing(vars: set[str]) -> Iterator[Constraint]\n"
+    "\n"
+    "Returns an iterator over the current path constraints that contain the variables in `vars`."
+);
 static PyObject* Path_get_constraints_containing(PyObject* self, PyObject* args, PyObject* keywords)
 {
     PySetObject* py_vars = nullptr;
@@ -61,6 +74,12 @@ static PyObject* Path_get_constraints_containing(PyObject* self, PyObject* args,
     );
 };
 
+PyDoc_STRVAR(
+    Path_constraints_doc,
+    "constraints() -> Iterator[Constraint]\n"
+    "\n"
+    "Returns an iterator over the current path constraints."
+);
 static PyObject* Path_constraints(PyObject* self, PyObject* args)
 {
     return PyPathIterator_FromWrapper(
@@ -68,6 +87,12 @@ static PyObject* Path_constraints(PyObject* self, PyObject* args)
     );
 };
 
+PyDoc_STRVAR(
+    Path_add_doc,
+    "add(constraint: Constraint)\n"
+    "\n"
+    "Add a path constraint"
+);
 static PyObject* Path_add(PyObject* self, PyObject* args)
 {
     PyObject* constr;
@@ -80,10 +105,10 @@ static PyObject* Path_add(PyObject* self, PyObject* args)
 };
 
 static PyMethodDef Path_methods[] = {
-    {"add", (PyCFunction)Path_add, METH_VARARGS, "Add a path constraint"},
-    {"constraints", (PyCFunction)Path_constraints, METH_VARARGS, "Get current path constraints"},
-    {"get_related_constraints", (PyCFunction)Path_get_related_constraints, METH_VARARGS, "Get all path constraints related to a constraint or expression"},
-    {"get_constraints_containing", (PyCFunction)Path_get_constraints_containing, METH_VARARGS, "Get current path constraints containing at least one variable from a given set"},
+    {"add", (PyCFunction)Path_add, METH_VARARGS, Path_add_doc},
+    {"constraints", (PyCFunction)Path_constraints, METH_VARARGS, Path_constraints_doc},
+    {"get_related_constraints", (PyCFunction)Path_get_related_constraints, METH_VARARGS, Path_get_related_constraints_doc},
+    {"get_constraints_containing", (PyCFunction)Path_get_constraints_containing, METH_VARARGS, Path_get_constraints_containing_doc},
     {NULL, NULL, 0, NULL}
 };
 
@@ -91,12 +116,16 @@ static PyMemberDef Path_members[] = {
     {NULL}
 };
 
+PyDoc_STRVAR(
+    Path_doc,
+    "The PathManager holds the symbolic constraints associated with the current execution path."
+);
 static PyTypeObject Path_Type = {
     PyVarObject_HEAD_INIT(NULL, 0)
     "PathManager",                            /* tp_name */
-    sizeof(Path_Object),                /* tp_basicsize */
+    sizeof(Path_Object),                      /* tp_basicsize */
     0,                                        /* tp_itemsize */
-    (destructor)Path_dealloc,           /* tp_dealloc */
+    (destructor)Path_dealloc,                 /* tp_dealloc */
     0,                                       /* tp_print */
     0,                                        /* tp_getattr */
     0,                                        /* tp_setattr */
@@ -112,15 +141,15 @@ static PyTypeObject Path_Type = {
     0,                                        /* tp_setattro */
     0,                                        /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT,                       /* tp_flags */
-    "Path Manager",                          /* tp_doc */
+    Path_doc,                                 /* tp_doc */
     0,                                        /* tp_traverse */
     0,                                        /* tp_clear */
     0,                                        /* tp_richcompare */
     0,                                        /* tp_weaklistoffset */
     0,                                        /* tp_iter */
     0,                                        /* tp_iternext */
-    Path_methods,                       /* tp_methods */
-    Path_members,                       /* tp_members */
+    Path_methods,                             /* tp_methods */
+    Path_members,                             /* tp_members */
     0,                                        /* tp_getset */
     0,                                        /* tp_base */
     0,                                        /* tp_dict */
@@ -181,7 +210,7 @@ PyObject* PathIterator_iternext(PyObject *self)
 
 static PyTypeObject PathIterator_Type = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    "PathIterator ",                            /* tp_name */
+    "PathIterator",                            /* tp_name */
     sizeof(PathIterator_Object),                /* tp_basicsize */
     0,                                        /* tp_itemsize */
     (destructor)PathIterator_dealloc,           /* tp_dealloc */
