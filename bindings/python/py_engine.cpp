@@ -579,7 +579,6 @@ void init_engine(PyObject* module)
                 "Used internally");
     create_enum(module, "STOP", stop_enum, "Reason why the engine stopped running code");
 
-    register_type(module, (PyTypeObject*)get_Info_Type());
     register_type(module, (PyTypeObject*)get_MaatEngine_Type());
 };
 

@@ -126,6 +126,7 @@ void _clear_MaatEngine_attributes(MaatEngine_Object* object);
 #define as_engine_object(x)  (*((MaatEngine_Object*)x))
 
 // ====================== Info ======================
+void init_info(PyObject* module);
 typedef struct{
     PyObject_HEAD
     info::RegAccess* access;

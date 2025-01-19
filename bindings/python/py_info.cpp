@@ -2,7 +2,7 @@
 
 namespace maat{
 namespace py{
-    
+
 // =============== RegAccess =================
 static void RegAccess_dealloc(PyObject* self){
     if( ! as_regaccess_object(self).is_ref){
@@ -111,6 +111,10 @@ PyTypeObject RegAccess_Type = {
     0,                                        /* tp_alloc */
     0,                                        /* tp_new */
 };
+
+PyObject* get_RegAccess_Type(){
+    return (PyObject*)&RegAccess_Type;
+}
 
 PyObject* PyRegAccess_FromRegAccess(info::RegAccess* access, bool is_ref)
 {
@@ -246,6 +250,10 @@ PyTypeObject MemAccess_Type = {
     0,                                        /* tp_new */
 };
 
+PyObject* get_MemAccess_Type(){
+    return (PyObject*)&MemAccess_Type;
+}
+
 PyObject* PyMemAccess_FromMemAccess(info::MemAccess* access, bool is_ref){
     MemAccess_Object* object;
     
@@ -372,6 +380,9 @@ PyTypeObject Branch_Type = {
     0,                                        /* tp_new */
 };
 
+PyObject* get_Branch_Type(){
+    return (PyObject*)&Branch_Type;
+}
 
 PyObject* PyBranch_FromBranch(info::Branch* branch, bool is_ref){
     Branch_Object* object;
@@ -541,6 +552,18 @@ PyObject* PyInfo_FromInfoAndArch(info::Info* info, bool is_ref, Arch* arch){
         object->arch = arch;
     }
     return (PyObject*)object;
+}
+
+
+/* ------------------------------------
+ *          Init function
+ * ------------------------------------ */
+void init_info(PyObject* module)
+{
+    register_type(module, (PyTypeObject*)get_Info_Type());
+    register_type(module, (PyTypeObject*)get_RegAccess_Type());
+    register_type(module, (PyTypeObject*)get_Branch_Type());
+    register_type(module, (PyTypeObject*)get_MemAccess_Type());
 }
 
 } // namespace py

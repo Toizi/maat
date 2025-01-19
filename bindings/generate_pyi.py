@@ -9,7 +9,6 @@ class SignatureError(Exception):
     pass
 
 def get_signature(func) -> str:
-    print(func.__name__)
     func_name = func.__name__
     if func.__doc__ is None:
         raise RuntimeError(f"Could not find __doc__ on {func_name}, fix docs")
@@ -30,6 +29,22 @@ def get_signature(func) -> str:
         raise SignatureError(f"Could not find signature in first line of {func_name}.__doc__, fix docs.\n  Err: {err}")
     return sig
 
+def function_def(obj, fail_on_sig_err) -> str:
+    s = ''
+    try:
+        sig = get_signature(obj)
+    except SignatureError as err:
+        if fail_on_sig_err:
+            raise
+        else:
+            print(f"warning: {err}")
+            sig = f'{obj.__name__}(*args, **kwargs)'
+
+    s += f'\ndef {sig}:\n'
+    s += f"    '''{obj.__doc__}'''\n"
+    s += "    ...\n\n"
+    return s
+
 def method_def(obj, function_name, fail_on_sig_err) -> str:
     s = ''
     # check if we have a method or a static function
@@ -37,7 +52,6 @@ def method_def(obj, function_name, fail_on_sig_err) -> str:
     self_str = 'self, ' if is_method else ''
     try:
         sig = get_signature(obj)
-        print(sig)
         # replace function name in case we have a different one.
         # this is mainly relevant for __init__ since the docstring sits on the class
         # and needs to be transferred to __init__
@@ -97,7 +111,9 @@ def generate_pyi(module , fail_on_sig_err: bool) -> str:
     s += 'from typing import Any\n'
 
     for name, obj in inspect.getmembers(module):
-        print(name)
+        if name.startswith('__'):
+            continue
+
         if inspect.isclass(obj):
             is_enum = hasattr(obj, '_enum_docs')
             if is_enum:
@@ -108,7 +124,8 @@ def generate_pyi(module , fail_on_sig_err: bool) -> str:
             s += f'class {classdef}:\n'
             s += f"    '''{obj.__doc__}'''\n\n"
 
-            if hasattr(obj, '__init__'):
+            # if it has the default __init__, it probably cannot be called
+            if hasattr(obj, '__init__') and obj.__init__ != object.__init__:
                 s += method_def(obj, '__init__', fail_on_sig_err)
 
             for member_name, member in inspect.getmembers(obj):
@@ -123,6 +140,8 @@ def generate_pyi(module , fail_on_sig_err: bool) -> str:
                             s += method_def(member, member_name, fail_on_sig_err)
                         else:
                             s += member_def(member, fail_on_sig_err)
+        elif callable(obj):
+            s += function_def(obj, fail_on_sig_err)
     return s
 
 def main():

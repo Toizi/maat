@@ -85,7 +85,7 @@ static PyGetSetDef Stats_getset[] = {
 };
 
 
-/* Type description for python Expr objects */
+/* Type description for python stats objects */
 PyTypeObject Stats_Type = {
     PyVarObject_HEAD_INIT(NULL, 0)
     "MaatStats",                                   /* tp_name */
@@ -143,6 +143,8 @@ PyObject* maat_Stats()
 
 void init_stats(PyObject* module)
 {
+    register_type(module, (PyTypeObject*)get_Stats_Type());
+
     // HACK: We create an instance instead of exposing the class directly
     // because setting class-level properties from the Python C API is
     // just too cumbersome. With an instance we can use the regular tp_getset
