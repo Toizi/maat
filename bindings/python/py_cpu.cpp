@@ -35,7 +35,8 @@ static PyMethodDef CPU_methods[] = {
 };
 
 static PyMemberDef CPU_members[] = {
-    {"regs", T_OBJECT_EX, offsetof(CPU_Object, regs), READONLY, "Symbolic Variables Context"},
+    // use Any as type instead of Regs since we don't generate a list of registers
+    {"regs", T_OBJECT_EX, offsetof(CPU_Object, regs), READONLY, "type=Any\nCPU registers"},
     {NULL}
 };
 

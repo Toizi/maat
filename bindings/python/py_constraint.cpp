@@ -29,10 +29,22 @@ static PyObject* Constraint_repr(PyObject* self) {
     return Constraint_str(self);
 }
 
+PyDoc_STRVAR(
+    Constraint_invert_doc,
+    "invert() -> Constraint\n"
+    "\n"
+    "Returns the invert of the constraint"
+);
 static PyObject* Constraint_invert(PyObject* self) {
     return PyConstraint_FromConstraint((*(as_constraint_object(self).constr))->invert());
 }
 
+PyDoc_STRVAR(
+    Constraint_contained_vars_doc,
+    "contained_vars() -> List[str]\n"
+    "\n"
+    "Returns a list of the contained vars of this constraint"
+);
 static PyObject* Constraint_contained_vars(PyObject* self) {
     std::set<std::string> res;
     res = (*(as_constraint_object(self).constr))->contained_vars();
@@ -164,8 +176,8 @@ PyObject* maat_ULT(PyObject* self, PyObject* args)
 }
 
 static PyMethodDef Constraint_methods[] = {
-    {"invert", (PyCFunction)Constraint_invert, METH_NOARGS, "Returns the invert of the condition"},
-    {"contained_vars", (PyCFunction)Constraint_contained_vars, METH_NOARGS, "Returns a list of involved symbolic variables"},
+    {"invert", (PyCFunction)Constraint_invert, METH_NOARGS, Constraint_invert_doc},
+    {"contained_vars", (PyCFunction)Constraint_contained_vars, METH_NOARGS, Constraint_contained_vars_doc},
     {NULL, NULL, 0, NULL}
 };
 

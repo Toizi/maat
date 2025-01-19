@@ -80,20 +80,20 @@ MAAT_DEFINE_STATS_GETTER(solver_average_time)
 MAAT_DEFINE_STATS_GETTER(solver_calls_count)
 
 static PyGetSetDef Stats_getset[] = {
-    MAAT_GETDEF(symptr_read_total_time, "Total time spent solving symbolic pointer reads (in milliseconds)"),
-    MAAT_GETDEF(symptr_read_average_time, "Average time spent solving symbolic pointer reads (in milliseconds)"),
-    MAAT_GETDEF(symptr_read_average_range, "Average range of symbolic pointer reads"),
-    MAAT_GETDEF(symptr_read_count, "Total number of symbolic pointer reads"),
-    MAAT_GETDEF(symptr_write_total_time, "Total time spent solving symbolic pointer writes (in milliseconds)"),
-    MAAT_GETDEF(symptr_write_average_time, "Average time spent solving symbolic pointer rwrites (in milliseconds)"),
-    MAAT_GETDEF(symptr_write_average_range, "Average range of symbolic pointer writes"),
-    MAAT_GETDEF(symptr_write_count, "Total number of symbolic pointer writes"),
-    MAAT_GETDEF(executed_insts, "Total number of assembly instructions symbolically executed"),
-    MAAT_GETDEF(lifted_insts, "Total number of assembly instructions lifted to IR"),
-    MAAT_GETDEF(executed_ir_insts, "Total number of IR instructions executed"),
-    MAAT_GETDEF(solver_total_time, "Total time spend solving symbolic constraints (in milliseconds)"),
-    MAAT_GETDEF(solver_average_time, "Average time spend solving symbolic constraints (in milliseconds)"),
-    MAAT_GETDEF(solver_calls_count, "Total number of calls to the solver"),
+    MAAT_GETDEF(symptr_read_total_time, "type=int\nTotal time spent solving symbolic pointer reads (in milliseconds)"),
+    MAAT_GETDEF(symptr_read_average_time, "type=int\nAverage time spent solving symbolic pointer reads (in milliseconds)"),
+    MAAT_GETDEF(symptr_read_average_range, "type=int\nAverage range of symbolic pointer reads"),
+    MAAT_GETDEF(symptr_read_count, "type=int\nTotal number of symbolic pointer reads"),
+    MAAT_GETDEF(symptr_write_total_time, "type=int\nTotal time spent solving symbolic pointer writes (in milliseconds)"),
+    MAAT_GETDEF(symptr_write_average_time, "type=int\nAverage time spent solving symbolic pointer rwrites (in milliseconds)"),
+    MAAT_GETDEF(symptr_write_average_range, "type=int\nAverage range of symbolic pointer writes"),
+    MAAT_GETDEF(symptr_write_count, "type=int\nTotal number of symbolic pointer writes"),
+    MAAT_GETDEF(executed_insts, "type=int\nTotal number of assembly instructions symbolically executed"),
+    MAAT_GETDEF(lifted_insts, "type=int\nTotal number of assembly instructions lifted to IR"),
+    MAAT_GETDEF(executed_ir_insts, "type=int\nTotal number of IR instructions executed"),
+    MAAT_GETDEF(solver_total_time, "type=int\nTotal time spend solving symbolic constraints (in milliseconds)"),
+    MAAT_GETDEF(solver_average_time, "type=int\nAverage time spend solving symbolic constraints (in milliseconds)"),
+    MAAT_GETDEF(solver_calls_count, "type=int\nTotal number of calls to the solver"),
     {NULL}
 };
 

@@ -91,6 +91,7 @@ PyMODINIT_FUNC PyInit_maat()
     init_solver(module);
     init_simplestate(module);
     init_info(module);
+    init_filesystem(module);
 
     PyState_AddModule(module, &maat_module_def);
 

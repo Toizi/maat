@@ -292,6 +292,11 @@ static PyObject* Branch_repr(PyObject* self) {
 }
 
 
+PyDoc_STRVAR(Branch_get_cond_doc,
+    "type=Constraint\n"
+    "\n"
+    "Branch condition (if conditional branch). The branch is taken if cond is evaluated to True"
+);
 static PyObject* Branch_get_cond(PyObject* self, void* closure){
     if( as_branch_object(self).branch->cond == nullptr ){
         return PyErr_Format(PyExc_AttributeError, "'cond' property is not set currently");
@@ -299,6 +304,11 @@ static PyObject* Branch_get_cond(PyObject* self, void* closure){
     return PyConstraint_FromConstraint(as_branch_object(self).branch->cond);
 }
 
+PyDoc_STRVAR(Branch_get_taken_doc,
+    "type=bool\n"
+    "\n"
+    "True if the branch is taken"
+);
 static PyObject* Branch_get_taken(PyObject* self, void* closure){
     if( not as_branch_object(self).branch->taken.has_value()){
         return PyErr_Format(PyExc_AttributeError, "'taken' property is not set currently");
@@ -316,6 +326,11 @@ static int Branch_set_taken(PyObject* self, PyObject* val, void* closure){
     return 0;
 }
 
+PyDoc_STRVAR(Branch_get_target_doc,
+    "type=Value\n"
+    "\n"
+    "Target address if the branch is taken"
+);
 static PyObject* Branch_get_target(PyObject* self, void* closure){
     if( as_branch_object(self).branch->target.is_none() ){
         return PyErr_Format(PyExc_AttributeError, "'target' property is not set currently");
@@ -323,6 +338,11 @@ static PyObject* Branch_get_target(PyObject* self, void* closure){
     return PyValue_FromValue(as_branch_object(self).branch->target);
 }
 
+PyDoc_STRVAR(Branch_get_next_doc,
+    "type=Value\n"
+    "\n"
+    "Address of the next instruction to execute if the branch is *not* taken"
+);
 static PyObject* Branch_get_next(PyObject* self, void* closure){
     if( as_branch_object(self).branch->next.is_none() ){
         return PyErr_Format(PyExc_AttributeError, "'next' property is not set currently");
@@ -331,36 +351,36 @@ static PyObject* Branch_get_next(PyObject* self, void* closure){
 }
 
 static PyGetSetDef Branch_getset[] = {
-    {"cond", Branch_get_cond, NULL, "Branch condition (if applicable)", NULL},
-    {"target", Branch_get_target, NULL, "Target instruction if branch is taken", NULL},
-    {"next", Branch_get_next, NULL, "Next instruction if branch is not taken", NULL},
-    {"taken", Branch_get_taken, Branch_set_taken, "Is the branch taken or not", NULL},
+    {"cond", Branch_get_cond, NULL, Branch_get_cond_doc, NULL},
+    {"target", Branch_get_target, NULL, Branch_get_target_doc, NULL},
+    {"next", Branch_get_next, NULL, Branch_get_next_doc, NULL},
+    {"taken", Branch_get_taken, Branch_set_taken, Branch_get_taken_doc, NULL},
     {NULL}
 };
 
 
 PyTypeObject Branch_Type = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    "Branch",                                   /* tp_name */
-    sizeof(Branch_Object),                      /* tp_basicsize */
+    "Branch",                                 /* tp_name */
+    sizeof(Branch_Object),                    /* tp_basicsize */
     0,                                        /* tp_itemsize */
-    (destructor)Branch_dealloc,          /* tp_dealloc */
-    (printfunc)Branch_print,             /* tp_print */
+    (destructor)Branch_dealloc,               /* tp_dealloc */
+    (printfunc)Branch_print,                  /* tp_print */
     0,                                        /* tp_getattr */
     0,                                        /* tp_setattr */
     0,                                        /* tp_reserved */
-    Branch_repr,                         /* tp_repr */
+    Branch_repr,                              /* tp_repr */
     0,                                        /* tp_as_number */
     0,                                        /* tp_as_sequence */
     0,                                        /* tp_as_mapping */
     0,                                        /* tp_hash  */
     0,                                        /* tp_call */
-    Branch_str,                          /* tp_str */
+    Branch_str,                               /* tp_str */
     0,                                        /* tp_getattro */
     0,                                        /* tp_setattro */
     0,                                        /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT,                       /* tp_flags */
-    "Branch operation info",                              /* tp_doc */
+    "Branch operation info",                  /* tp_doc */
     0,                                        /* tp_traverse */
     0,                                        /* tp_clear */
     0,                                        /* tp_richcompare */
@@ -369,7 +389,7 @@ PyTypeObject Branch_Type = {
     0,                                        /* tp_iternext */
     0,                                        /* tp_methods */
     0,                                        /* tp_members */
-    Branch_getset,                       /* tp_getset */
+    Branch_getset,                            /* tp_getset */
     0,                                        /* tp_base */
     0,                                        /* tp_dict */
     0,                                        /* tp_descr_get */

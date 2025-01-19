@@ -256,6 +256,7 @@ PyObject* get_FileAccessor_Type();
 PyObject* PyFileAccessor_FromFileAccessor(env::FileAccessor* fa, bool is_ref);
 #define as_fileaccessor_object(x)  (*((FileAccessor_Object*)x))
 
+void init_filesystem(PyObject* module);
 typedef struct{
     PyObject_HEAD
     maat::env::FileSystem* fs;

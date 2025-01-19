@@ -30,6 +30,18 @@ static PyObject* EventManager_repr(PyObject* self)
     return EventManager_str(self);
 }
 
+PyDoc_STRVAR(
+    EventManager_add_doc,
+    "add(event: EVENT, when: WHEN, name: str='', filter: int|Tuple[int, int]=-1, callbacks: List[Callable]=[], group: str='') -> int\n"
+    "\n"
+    ":param EVENT event: Event to hook\n"
+    ":param WHEN when: When to trigger the hook (before or after the event)\n"
+    ":param str name: (Optional) Unique name to identify the hook\n"
+    ":param int|Tuple[int,int] filter: (Optional) Address range on which to trigger the hook. It is used only for memory access events and the EVENT.EXEC event."
+    "The parameter can be a single integer to monitor a single address, or a tuple of two integers to monitor a range of addresses.\n"
+    ":param List[Callable] callbacks: (Optional) List of callbacks to be called every time the hook is triggered\n"
+    ":param str group: (Optional) Group of the hook"
+);
 static PyObject* EventManager_add(PyObject* self, PyObject*args, PyObject* keywords)
 {
     int int_event, int_when;
@@ -110,6 +122,12 @@ static PyObject* EventManager_add(PyObject* self, PyObject*args, PyObject* keywo
     Py_RETURN_NONE;
 };
 
+PyDoc_STRVAR(
+    EventManager_disable_doc,
+    "disable(hook_name: str)\n"
+    "\n"
+    "Disable the hook named *hook_name*"
+);
 static PyObject* EventManager_disable(PyObject* self, PyObject *args)
 {
     const char* name;
@@ -128,6 +146,12 @@ static PyObject* EventManager_disable(PyObject* self, PyObject *args)
     Py_RETURN_NONE;
 };
 
+PyDoc_STRVAR(
+    EventManager_disable_group_doc,
+    "disable_group(group: str)\n"
+    "\n"
+    "Disable the hook group registered as *group*"
+);
 static PyObject* EventManager_disable_group(PyObject* self, PyObject *args)
 {
     const char* name;
@@ -146,6 +170,12 @@ static PyObject* EventManager_disable_group(PyObject* self, PyObject *args)
     Py_RETURN_NONE;
 };
 
+PyDoc_STRVAR(
+    EventManager_enable_doc,
+    "enable(hook_name: str)\n"
+    "\n"
+    "Enable the hook named *hook_name*"
+);
 static PyObject* EventManager_enable(PyObject* self, PyObject *args)
 {
     const char* name;
@@ -165,6 +195,12 @@ static PyObject* EventManager_enable(PyObject* self, PyObject *args)
     Py_RETURN_NONE;
 };
 
+PyDoc_STRVAR(
+    EventManager_enable_group_doc,
+    "enable_group(group: str)\n"
+    "\n"
+    "Enable the hook group registered as *group*"
+);
 static PyObject* EventManager_enable_group(PyObject* self, PyObject *args)
 {
     const char* name;
@@ -184,6 +220,12 @@ static PyObject* EventManager_enable_group(PyObject* self, PyObject *args)
     Py_RETURN_NONE;
 };
 
+PyDoc_STRVAR(
+    EventManager_disable_all_doc,
+    "disable_all()\n"
+    "\n"
+    "Disable all hooks"
+);
 static PyObject* EventManager_disable_all(PyObject* self )
 {
     as_event_object(self).manager->disable_all();
@@ -192,12 +234,12 @@ static PyObject* EventManager_disable_all(PyObject* self )
 
 
 static PyMethodDef EventManager_methods[] = {
-    {"add", (PyCFunction)EventManager_add, METH_VARARGS | METH_KEYWORDS, "Add a hook"},
-    {"disable", (PyCFunction)EventManager_disable, METH_VARARGS, "Disable a given hook"},
-    {"disable_group", (PyCFunction)EventManager_disable_group, METH_VARARGS, "Disable a group of hooks"},
-    {"disable_all", (PyCFunction)EventManager_disable_all, METH_NOARGS, "Disable all hooks"},
-    {"enable", (PyCFunction)EventManager_enable, METH_VARARGS, "Enable a given hook"},
-    {"enable_group", (PyCFunction)EventManager_enable_group, METH_VARARGS, "Enable a group of hooks"},
+    {"add", (PyCFunction)EventManager_add, METH_VARARGS | METH_KEYWORDS, EventManager_add_doc},
+    {"disable", (PyCFunction)EventManager_disable, METH_VARARGS, EventManager_disable_doc},
+    {"disable_group", (PyCFunction)EventManager_disable_group, METH_VARARGS, EventManager_disable_group_doc},
+    {"disable_all", (PyCFunction)EventManager_disable_all, METH_NOARGS, EventManager_disable_all_doc},
+    {"enable", (PyCFunction)EventManager_enable, METH_VARARGS, EventManager_enable_doc},
+    {"enable_group", (PyCFunction)EventManager_enable_group, METH_VARARGS, EventManager_enable_group_doc},
     {NULL, NULL, 0, NULL}
 };
 

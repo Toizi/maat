@@ -173,20 +173,20 @@ static int Settings_set_print_ir(PyObject* self, PyObject* val, void* closure){
 }
 
 static PyGetSetDef Settings_getset[] = {
-    {"symptr_refine_timeout", Settings_get_symptr_refine_timeout, Settings_set_symptr_refine_timeout, "Maximum time to spend on symbolic pointer range refinement (in milliseconds, per pointer)", NULL},
-    {"symptr_max_range", Settings_get_symptr_max_range, Settings_set_symptr_max_range, "Maximum range of possible values for symbolic pointers"},
-    {"force_simplify", Settings_get_force_simplify, Settings_set_force_simplify, "Systematically simplify newly created symbolic expressions"},
-    {"symptr_read", Settings_get_symptr_read, Settings_set_symptr_read, "Allow reading from symbolic pointers"},
-    {"symptr_write", Settings_get_symptr_write, Settings_set_symptr_write, "Allow writing to symbolic pointers"},
-    {"ignore_missing_imports", Settings_get_ignore_missing_imports, Settings_set_ignore_missing_imports, "Ignore calls to functions that are neither loaded nor emulated"},
-    {"ignore_missing_syscalls", Settings_get_ignore_missing_syscalls, Settings_set_ignore_missing_syscalls, "Ignore syscalls that can not be emulated"},
-    {"record_path_constraints", Settings_get_record_path_constraints, Settings_set_record_path_constraints, "Record symbolic constraints associated with the current execution path"},
-    {"symptr_assume_aligned", Settings_get_symptr_assume_aligned, Settings_set_symptr_assume_aligned, "Assume that symbolic pointers are aligned on the default architecture address size"},
-    {"symptr_limit_range", Settings_get_symptr_limit_range, Settings_set_symptr_limit_range, "Arbitrary limit the maximal range of symbolic pointers"},
-    {"symptr_refine_range", Settings_get_symptr_refine_range, Settings_set_symptr_refine_range, "Refine the range of symbolic pointers using the SMT solver"},
-    {"log_insts", Settings_get_print_insts, Settings_set_print_insts, "Log every executed instruction"},
-    {"log_calls", Settings_get_print_calls, Settings_set_print_calls, "Log calls to functions and system calls"},
-    {"log_ir", Settings_get_print_ir, Settings_set_print_ir, "Log every executed IR instruction"},
+    {"symptr_refine_timeout", Settings_get_symptr_refine_timeout, Settings_set_symptr_refine_timeout, "type=int\nMaximum time to spend on symbolic pointer range refinement (in milliseconds, per pointer)", NULL},
+    {"symptr_max_range", Settings_get_symptr_max_range, Settings_set_symptr_max_range, "type=int\nMaximum range of possible values for symbolic pointers"},
+    {"force_simplify", Settings_get_force_simplify, Settings_set_force_simplify, "type=bool\nSystematically simplify newly created symbolic expressions"},
+    {"symptr_read", Settings_get_symptr_read, Settings_set_symptr_read, "type=bool\nAllow reading from symbolic pointers"},
+    {"symptr_write", Settings_get_symptr_write, Settings_set_symptr_write, "type=bool\nAllow writing to symbolic pointers"},
+    {"ignore_missing_imports", Settings_get_ignore_missing_imports, Settings_set_ignore_missing_imports, "type=bool\nIgnore calls to functions that are neither loaded nor emulated"},
+    {"ignore_missing_syscalls", Settings_get_ignore_missing_syscalls, Settings_set_ignore_missing_syscalls, "type=bool\nIgnore syscalls that can not be emulated"},
+    {"record_path_constraints", Settings_get_record_path_constraints, Settings_set_record_path_constraints, "type=bool\nRecord symbolic constraints associated with the current execution path"},
+    {"symptr_assume_aligned", Settings_get_symptr_assume_aligned, Settings_set_symptr_assume_aligned, "type=bool\nAssume that symbolic pointers are aligned on the default architecture address size"},
+    {"symptr_limit_range", Settings_get_symptr_limit_range, Settings_set_symptr_limit_range, "type=int\nArbitrary limit the maximal range of symbolic pointers"},
+    {"symptr_refine_range", Settings_get_symptr_refine_range, Settings_set_symptr_refine_range, "type=bool\nRefine the range of symbolic pointers using the SMT solver"},
+    {"log_insts", Settings_get_print_insts, Settings_set_print_insts, "type=bool\nLog every executed instruction"},
+    {"log_calls", Settings_get_print_calls, Settings_set_print_calls, "type=bool\nLog calls to functions and system calls"},
+    {"log_ir", Settings_get_print_ir, Settings_set_print_ir, "type=bool\nLog every executed IR instruction"},
     {NULL}
 };
 

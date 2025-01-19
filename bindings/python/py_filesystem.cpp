@@ -28,6 +28,14 @@ static PyObject* FileSystem_repr(PyObject* self) {
     return FileSystem_str(self);
 }
 
+PyDoc_STRVAR(
+    FileSystem_new_fa_doc,
+    "new_fa(filepath: str) -> int\n"
+    "\n"
+    "Create a new file accessor for a file. Returns an opaque unique handle for the created file accessor.\n"
+    "\n"
+    ":param str filepath: Path of the file for which to create a new accessor"
+);
 static PyObject* FileSystem_new_fa(PyObject* self, PyObject *args)
 {
     const char* file;
@@ -46,6 +54,14 @@ static PyObject* FileSystem_new_fa(PyObject* self, PyObject *args)
     }
 };
 
+PyDoc_STRVAR(
+    FileSystem_get_fa_by_handle_doc,
+    "get_fa_by_handle(handle: int) -> FileAccessor\n"
+    "\n"
+    "Return the file accessor corresponding to the given handle\n"
+    "\n"
+    ":param int handle: The handle identifying the file accessor. If invalid, raises a runtime exception"
+);
 static PyObject* FileSystem_get_fa_by_handle(PyObject* self, PyObject *args)
 {
     int handle;
@@ -65,6 +81,16 @@ static PyObject* FileSystem_get_fa_by_handle(PyObject* self, PyObject *args)
     }
 };
 
+PyDoc_STRVAR(
+    FileSystem_delete_fa_doc,
+    "delete_fa(handle: int, weak: bool=False)\n"
+    "\n"
+    "Delete the file accessor corresponding to the given handle\n"
+    "\n"
+    ":param int handle: The handle identifying the file accessor\n"
+    ":param bool weak: If set to `True` and the engine restores a snapshot that was taken before the file accessor deletion, "
+    "the file accessor will be restored as well. If set to `False`, the file accessor is deleted and never restored."
+);
 static PyObject* FileSystem_delete_fa(PyObject* self, PyObject*args, PyObject* keywords)
 {
     int handle;
@@ -87,6 +113,12 @@ static PyObject* FileSystem_delete_fa(PyObject* self, PyObject*args, PyObject* k
     }
 }
 
+PyDoc_STRVAR(
+    FileSystem_get_file_doc,
+    "get_file(filepath: str, follow_symlink: bool=True) -> File\n"
+    "\n"
+    "Get a symbolic file from the file system"
+);
 static PyObject* FileSystem_get_file(PyObject* self, PyObject*args, PyObject* keywords)
 {
     const char* filename;
@@ -116,6 +148,12 @@ static PyObject* FileSystem_get_file(PyObject* self, PyObject*args, PyObject* ke
     }
 }
 
+PyDoc_STRVAR(
+    FileSystem_get_stdin_for_pid_doc,
+    "get_stdin_for_pid(pid: int) -> str\n"
+    "\n"
+    "Return the path of the standard input file for a process given its PID"
+);
 static PyObject* FileSystem_get_stdin_for_pid(PyObject* self, PyObject *args)
 {
     int pid;
@@ -135,6 +173,12 @@ static PyObject* FileSystem_get_stdin_for_pid(PyObject* self, PyObject *args)
     }
 };
 
+PyDoc_STRVAR(
+    FileSystem_add_real_file_doc,
+    "add_real_file(real_file_path: str, virtual_file_path: str, create_path: bool=True) -> bool\n"
+    "\n"
+    "Add a file to the virtual fs. Returns True if succeeded or False otherwise."
+);
 static PyObject* FileSystem_add_real_file(PyObject* self, PyObject*args)
 {
     const char* real_file_path;
@@ -161,12 +205,12 @@ static PyObject* FileSystem_add_real_file(PyObject* self, PyObject*args)
 }
 
 static PyMethodDef FileSystem_methods[] = {
-    {"add_real_file", (PyCFunction)FileSystem_add_real_file, METH_VARARGS, "Map a real file in the virtual file system"},
-    {"new_fa", (PyCFunction)FileSystem_new_fa, METH_VARARGS, "Create a new file accessor for a file"},
-    {"get_fa_by_handle", (PyCFunction)FileSystem_get_fa_by_handle, METH_VARARGS, "Get a file accessor by handle"},
-    {"delete_fa", (PyCFunction)FileSystem_delete_fa, METH_VARARGS | METH_KEYWORDS, "Remove a file accessor"},
-    {"get_file", (PyCFunction)FileSystem_get_file, METH_VARARGS | METH_KEYWORDS, "Get a physical file"},
-    {"get_stdin_for_pid", (PyCFunction)FileSystem_get_stdin_for_pid, METH_VARARGS, "Get the name of the stdin file for a given process"},
+    {"add_real_file", (PyCFunction)FileSystem_add_real_file, METH_VARARGS, FileSystem_add_real_file_doc},
+    {"new_fa", (PyCFunction)FileSystem_new_fa, METH_VARARGS, FileSystem_new_fa_doc},
+    {"get_fa_by_handle", (PyCFunction)FileSystem_get_fa_by_handle, METH_VARARGS, FileSystem_get_fa_by_handle_doc},
+    {"delete_fa", (PyCFunction)FileSystem_delete_fa, METH_VARARGS | METH_KEYWORDS, FileSystem_delete_fa_doc},
+    {"get_file", (PyCFunction)FileSystem_get_file, METH_VARARGS | METH_KEYWORDS, FileSystem_get_file_doc},
+    {"get_stdin_for_pid", (PyCFunction)FileSystem_get_stdin_for_pid, METH_VARARGS, FileSystem_get_stdin_for_pid_doc},
     {NULL, NULL, 0, NULL}
 };
 
@@ -210,6 +254,10 @@ PyTypeObject FileSystem_Type = {
     0,                                        /* tp_alloc */
     0,                                        /* tp_new */
 };
+
+PyObject* get_FileSystem_Type() {
+    return (PyObject*)&FileSystem_Type;
+}
 
 // Constructor
 PyObject* PyFileSystem_FromFileSystem(maat::env::FileSystem* fs, bool is_ref)
@@ -263,6 +311,13 @@ PyObject* generic_buffer_translate(std::vector<Value>& native_buf, PyObject* buf
 }
 
 
+PyDoc_STRVAR(
+    FileAccessor_write_buffer_doc,
+    "write_buffer(buffer: bytes|List[Value]) -> int\n"
+    "\n"
+    "Write a buffer to a symbolic file. Returns the number of bytes written.\n"
+    ":param bytes|List[Value] buffer: Concrete bytes or abstract values to write to the file"
+);
 static PyObject* FileAccessor_write_buffer(PyObject* self, PyObject *args)
 {
     PyObject* buf;
@@ -297,6 +352,15 @@ static PyObject* FileAccessor_write_buffer(PyObject* self, PyObject *args)
     }
 };
 
+PyDoc_STRVAR(
+    FileAccessor_read_buffer_doc,
+    "read_buffer(offset: int, nb_elems: int, elem_size: int=1) -> List[Value]\n"
+    "\n"
+    "Read a buffer from a file at a given offset.\n"
+    ":param int offset: The offset from the beginning of the file of where to start reading\n"
+    ":param int nb_elems: Number of elements to read\n"
+    ":param int elem_size: (Optional) size in bytes of each element"
+);
 static PyObject* FileAccessor_read_buffer(PyObject* self, PyObject* args)
 {
     unsigned int nb_elems, elem_size=1;
@@ -332,8 +396,8 @@ static PyObject* FileAccessor_read_buffer(PyObject* self, PyObject* args)
 }
 
 static PyMethodDef FileAccessor_methods[] = {
-    {"write_buffer", (PyCFunction)FileAccessor_write_buffer, METH_VARARGS, "Write a buffer to a file"},
-    {"read_buffer", (PyCFunction)FileAccessor_read_buffer, METH_VARARGS | METH_KEYWORDS, "Read a buffer from a file"},
+    {"write_buffer", (PyCFunction)FileAccessor_write_buffer, METH_VARARGS, FileAccessor_write_buffer_doc},
+    {"read_buffer", (PyCFunction)FileAccessor_read_buffer, METH_VARARGS | METH_KEYWORDS, FileAccessor_read_buffer_doc},
     {NULL, NULL, 0, NULL}
 };
 
@@ -378,6 +442,10 @@ PyTypeObject FileAccessor_Type = {
     0,                                        /* tp_new */
 };
 
+PyObject* get_FileAccessor_Type() {
+    return (PyObject*)&FileAccessor_Type;
+}
+
 // Constructor
 PyObject* PyFileAccessor_FromFileAccessor(maat::env::FileAccessor* fa, bool is_ref)
 {
@@ -406,6 +474,14 @@ static void File_dealloc(PyObject* self)
 };
 
 
+PyDoc_STRVAR(
+    File_write_buffer_doc,
+    "write_buffer(offset: int, buffer: bytes|List[Value]) -> int\n"
+    "\n"
+    "Write a buffer to a symbolic file. Returns the number of bytes written.\n"
+    ":param int offset: The offset from the beginning of the file of where to start writing\n"
+    ":param bytes|List[Value] buffer: Concrete bytes or abstract values to write to the file"
+);
 static PyObject* File_write_buffer(PyObject* self, PyObject *args)
 {
     PyObject* buf;
@@ -443,6 +519,15 @@ static PyObject* File_write_buffer(PyObject* self, PyObject *args)
     }
 };
 
+PyDoc_STRVAR(
+    File_read_buffer_doc,
+    "read_buffer(offset: int, nb_elems: int, elem_size: int=1) -> List[Value]\n"
+    "\n"
+    "Read a buffer from a file at a given offset.\n"
+    ":param int offset: The offset from the beginning of the file of where to start reading\n"
+    ":param int nb_elems: Number of elements to read\n"
+    ":param int elem_size: (Optional) size in bytes of each element"
+);
 static PyObject* File_read_buffer(PyObject* self, PyObject* args)
 {
     unsigned int nb_elems, elem_size=1;
@@ -480,8 +565,8 @@ static PyObject* File_read_buffer(PyObject* self, PyObject* args)
 }
 
 static PyMethodDef File_methods[] = {
-    {"write_buffer", (PyCFunction)File_write_buffer, METH_VARARGS, "Write a buffer to a file"},
-    {"read_buffer", (PyCFunction)File_read_buffer, METH_VARARGS | METH_KEYWORDS, "Read a buffer from a file"},
+    {"write_buffer", (PyCFunction)File_write_buffer, METH_VARARGS, File_write_buffer_doc},
+    {"read_buffer", (PyCFunction)File_read_buffer, METH_VARARGS | METH_KEYWORDS, File_read_buffer_doc},
     {NULL, NULL, 0, NULL}
 };
 
@@ -526,6 +611,10 @@ PyTypeObject File_Type = {
     0,                                        /* tp_new */
 };
 
+PyObject* get_File_Type() {
+    return (PyObject*)&File_Type;
+}
+
 // Constructor
 PyObject* PyFile_FromPhysicalFile(maat::env::PhysicalFile* file, bool is_ref)
 {
@@ -540,6 +629,16 @@ PyObject* PyFile_FromPhysicalFile(maat::env::PhysicalFile* file, bool is_ref)
         object->is_ref = is_ref;
     }
     return (PyObject*)object;
+}
+
+/* ------------------------------------
+ *          Init function
+ * ------------------------------------ */
+void init_filesystem(PyObject* module)
+{
+    register_type(module, (PyTypeObject*)get_File_Type());
+    register_type(module, (PyTypeObject*)get_FileSystem_Type());
+    register_type(module, (PyTypeObject*)get_FileAccessor_Type());
 }
 
 }

@@ -16,16 +16,16 @@ static void Env_dealloc(PyObject* self)
 
 
 static PyMemberDef Env_members[] = {
-    {"fs", T_OBJECT_EX, offsetof(Env_Object, fs), READONLY, "Emulated symbolic file-system"},
+    {"fs", T_OBJECT_EX, offsetof(Env_Object, fs), READONLY, "type=FileSystem\nEmulated symbolic file-system"},
     {NULL}
 };
 
 PyTypeObject Env_Type = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    "EnvEmulator",                         /* tp_name */
-    sizeof(Env_Object),            /* tp_basicsize */
+    "EnvEmulator",                            /* tp_name */
+    sizeof(Env_Object),                       /* tp_basicsize */
     0,                                        /* tp_itemsize */
-    (destructor)Env_dealloc,       /* tp_dealloc */
+    (destructor)Env_dealloc,                  /* tp_dealloc */
     0,                                        /* tp_print */
     0,                                        /* tp_getattr */
     0,                                        /* tp_setattr */
@@ -41,7 +41,7 @@ PyTypeObject Env_Type = {
     0,                                        /* tp_setattro */
     0,                                        /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT,                       /* tp_flags */
-    "Process environment emulator",      /* tp_doc */
+    "Process environment emulator",           /* tp_doc */
     0,                                        /* tp_traverse */
     0,                                        /* tp_clear */
     0,                                        /* tp_richcompare */
@@ -60,6 +60,10 @@ PyTypeObject Env_Type = {
     0,                                        /* tp_alloc */
     0,                                        /* tp_new */
 };
+
+PyObject* get_Env_Type() {
+    return (PyObject*)&Env_Type;
+}
 
 // Constructor
 PyObject* PyEnv_FromEnvEmulator(maat::env::EnvEmulator* env, bool is_ref)
@@ -87,7 +91,7 @@ void init_env(PyObject* module)
     assign_enum(os_enum, "NONE", PyLong_FromLong((int)env::OS::NONE), "General");
     create_enum(module, "OS", os_enum, "Operating system supported for emulation");
 
-    register_type(module, &Env_Type);
+    register_type(module, (PyTypeObject*)get_Env_Type());
 };
 
 }
