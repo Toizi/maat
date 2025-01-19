@@ -11,29 +11,30 @@ class SignatureError(Exception):
 def get_signature(func) -> str:
     func_name = func.__name__
     if func.__doc__ is None:
-        raise RuntimeError(f"Could not find __doc__ on {func_name}, fix docs")
+        raise SignatureError(f"Could not find __doc__ on {func_name}, fix docs")
 
     sig = func.__doc__.splitlines()[0].strip()
     err = None
     if not sig.startswith(func_name):
-        err = f'signature does not start with function name: {sig}'
+        err = 'signature does not start with function name'
     elif func_name not in sig:
-        err = f'function name {func_name} not found in {sig}'
+        err = f'function name {func_name} not found in signature'
     elif sig.find('(') >= sig.find(')'):
         if '(' not in sig:
-            err = f'signature does not contain parentheses: {sig}'
+            err = 'signature does not contain parentheses'
         else:
-            err = f'closing parenthesis comes before open: {sig}'
+            err = 'closing parenthesis comes before open'
 
     if err:
-        raise SignatureError(f"Could not find signature in first line of {func_name}.__doc__, fix docs.\n  Err: {err}")
+        raise SignatureError(f"{err}.\n  First line on __doc__: {sig}")
     return sig
 
 def function_def(obj, fail_on_sig_err) -> str:
     s = ''
     try:
         sig = get_signature(obj)
-    except SignatureError as err:
+    except SignatureError as sig_err:
+        err = f"Could not determine signature of function def '{obj.__name__}': {sig_err}"
         if fail_on_sig_err:
             raise
         else:
@@ -45,7 +46,7 @@ def function_def(obj, fail_on_sig_err) -> str:
     s += "    ...\n\n"
     return s
 
-def method_def(obj, function_name, fail_on_sig_err) -> str:
+def method_def(class_obj, obj, function_name, fail_on_sig_err) -> str:
     s = ''
     # check if we have a method or a static function
     is_method = isinstance(obj, types.MethodDescriptorType) or function_name == '__init__'
@@ -56,7 +57,8 @@ def method_def(obj, function_name, fail_on_sig_err) -> str:
         # this is mainly relevant for __init__ since the docstring sits on the class
         # and needs to be transferred to __init__
         sig = function_name + f'({self_str}' + sig[sig.index('(') + 1:]
-    except SignatureError as err:
+    except SignatureError as sig_err:
+        err = f"Could not determine signature of method def '{class_obj.__name__}.{function_name}: {sig_err}'"
         if fail_on_sig_err:
             raise
         else:
@@ -70,7 +72,7 @@ def method_def(obj, function_name, fail_on_sig_err) -> str:
     s += "        ...\n\n"
     return s
 
-def member_def(obj, fail_on_sig_err) -> str:
+def member_def(class_obj, obj, fail_on_sig_err) -> str:
     s = ''
     member_name = obj.__name__
 
@@ -83,7 +85,7 @@ def member_def(obj, fail_on_sig_err) -> str:
         if line.startswith(type_start):
             type_str = line[len(type_start):]
     if type_str is None:
-        err = f"Could not find type declaration via '{type_start}' in member def {member_name}"
+        err = f"Could not find type declaration via '{type_start}' in member definition '{class_obj.__name__}.{member_name}'"
         if fail_on_sig_err:
             raise SignatureError(err)
         else:
@@ -126,7 +128,7 @@ def generate_pyi(module , fail_on_sig_err: bool) -> str:
 
             # if it has the default __init__, it probably cannot be called
             if hasattr(obj, '__init__') and obj.__init__ != object.__init__:
-                s += method_def(obj, '__init__', fail_on_sig_err)
+                s += method_def(obj, obj, '__init__', fail_on_sig_err)
 
             for member_name, member in inspect.getmembers(obj):
                 if not member_name.startswith('__') and member_name != '_enum_docs':
@@ -136,9 +138,9 @@ def generate_pyi(module , fail_on_sig_err: bool) -> str:
                             s += f"    '''{obj._enum_docs[member_name]}'''\n"
                     else:
                         if callable(member):
-                            s += method_def(member, member_name, fail_on_sig_err)
+                            s += method_def(obj, member, member_name, fail_on_sig_err)
                         else:
-                            s += member_def(member, fail_on_sig_err)
+                            s += member_def(obj, member, fail_on_sig_err)
         elif callable(obj):
             s += function_def(obj, fail_on_sig_err)
         else:
