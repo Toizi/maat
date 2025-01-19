@@ -3,10 +3,6 @@
 
 namespace maat{
 namespace py{
-    
-static void Stats_dealloc(PyObject* self){
-    Py_TYPE(self)->tp_free((PyObject *)self);
-};
 
 static int Stats_print(PyObject* self, void * io, int s)
 {
@@ -26,16 +22,33 @@ static PyObject* Stats_repr(PyObject* self)
     return Stats_str(self);
 }
 
+PyDoc_STRVAR(Stats_reset_doc,
+    "reset()\n"
+    "\n"
+    "Reset statistics."
+);
 static PyObject* Stats_reset(PyObject* self)
 {
     maat::MaatStats::instance().reset();
     Py_RETURN_NONE;
 }
 
+// initialized in init_stats
+static Stats_Object* singleton = nullptr;
 
+PyDoc_STRVAR(Stats_instance_doc,
+    "instance() -> MaatStats\n"
+    "\n"
+    "Get the singleton instance."
+);
+static PyObject* Stats_instance(PyObject* self)
+{
+    return (PyObject*)singleton;
+}
 
 static PyMethodDef Stats_methods[] = {
-    {"reset", (PyCFunction)Stats_reset, METH_NOARGS | METH_CLASS, "Reset statistics"},
+    {"instance", (PyCFunction)Stats_instance, METH_NOARGS | METH_CLASS, Stats_instance_doc},
+    {"reset", (PyCFunction)Stats_reset, METH_NOARGS | METH_CLASS, Stats_reset_doc},
     {NULL, NULL, 0, NULL}
 };
 
@@ -88,35 +101,35 @@ static PyGetSetDef Stats_getset[] = {
 /* Type description for python stats objects */
 PyTypeObject Stats_Type = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    "MaatStats",                                   /* tp_name */
-    sizeof(Stats_Object),                      /* tp_basicsize */
+    "MaatStats",                              /* tp_name */
+    sizeof(Stats_Object),                     /* tp_basicsize */
     0,                                        /* tp_itemsize */
-    (destructor)Stats_dealloc,            /* tp_dealloc */
-    (printfunc)Stats_print,               /* tp_print */
+    0,                                        /* tp_dealloc */
+    (printfunc)Stats_print,                   /* tp_print */
     0,                                        /* tp_getattr */
     0,                                        /* tp_setattr */
     0,                                        /* tp_reserved */
-    Stats_repr,                           /* tp_repr */
+    Stats_repr,                               /* tp_repr */
     0,                                        /* tp_as_number */
     0,                                        /* tp_as_sequence */
     0,                                        /* tp_as_mapping */
     0,                                        /* tp_hash  */
     0,                                        /* tp_call */
-    Stats_str,                            /* tp_str */
+    Stats_str,                                /* tp_str */
     0,                                        /* tp_getattro */
     0,                                        /* tp_setattro */
     0,                                        /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT,                       /* tp_flags */
-    "Maat statistics",             /* tp_doc */
+    "Maat statistics",                        /* tp_doc */
     0,                                        /* tp_traverse */
     0,                                        /* tp_clear */
     0,                                        /* tp_richcompare */
     0,                                        /* tp_weaklistoffset */
     0,                                        /* tp_iter */
     0,                                        /* tp_iternext */
-    Stats_methods,                                        /* tp_methods */
+    Stats_methods,                            /* tp_methods */
     0,                                        /* tp_members */
-    Stats_getset,                              /* tp_getset */
+    Stats_getset,                             /* tp_getset */
     0,                                        /* tp_base */
     0,                                        /* tp_dict */
     0,                                        /* tp_descr_get */
@@ -145,17 +158,8 @@ void init_stats(PyObject* module)
 {
     register_type(module, (PyTypeObject*)get_Stats_Type());
 
-    // HACK: We create an instance instead of exposing the class directly
-    // because setting class-level properties from the Python C API is
-    // just too cumbersome. With an instance we can use the regular tp_getset
-    // field to get the various stats.
-    Stats_Object *object = nullptr;
-    PyType_Ready(&Stats_Type);
-    object = PyObject_New(Stats_Object, &Stats_Type);
-    if (!object)
-        return;
-    if (PyModule_AddObject(module, "MaatStats", (PyObject*)object) < 0)
-        Py_DECREF(object);
+    // create the singleton
+    singleton = PyObject_New(Stats_Object, &Stats_Type);
 }
 
 } // namespace py
