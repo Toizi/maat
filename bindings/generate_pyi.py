@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 import sys
 import types
+import ast
 
 class SignatureError(Exception):
     pass
@@ -165,6 +166,12 @@ def main():
     print(f'Generating pyi file at {output_path}')
     module = import_module(args.module_path)
     pyi_str = generate_pyi(module, args.fail_on_missing_sig)
+    try:
+        # ast.parse(pyi_str, 'maat.pyi', mode='func_type', type_comments=True)
+        compile(pyi_str, 'maat.pyi', mode='exec', flags=ast.PyCF_ONLY_AST|ast.PyCF_TYPE_COMMENTS)
+    except:
+        print("error: could not compile() the generated type stubs")
+        raise
 
     with open(output_path, "w") as f:
         f.write(pyi_str)
