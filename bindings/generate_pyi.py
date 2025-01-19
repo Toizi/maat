@@ -130,7 +130,6 @@ def generate_pyi(module , fail_on_sig_err: bool) -> str:
 
             for member_name, member in inspect.getmembers(obj):
                 if not member_name.startswith('__') and member_name != '_enum_docs':
-                    print(member_name)
                     if is_enum:
                         s += f'    {member_name} = {int(member)}\n'
                         if member.__doc__:
@@ -142,6 +141,12 @@ def generate_pyi(module , fail_on_sig_err: bool) -> str:
                             s += member_def(member, fail_on_sig_err)
         elif callable(obj):
             s += function_def(obj, fail_on_sig_err)
+        else:
+            err = f"Unknown member on module {name}"
+            if fail_on_sig_err:
+                raise RuntimeError(err)
+            else:
+                print(f"warning: {err}")
     return s
 
 def main():
